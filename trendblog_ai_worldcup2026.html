@@ -1,0 +1,704 @@
+
+<h2 class="sr-only">TrendBlog AI — World Cup 2026 article generator powered by Claude AI</h2>
+
+<style>
+.tb-wrap { padding: 1rem 0 2rem; font-family: var(--font-sans); }
+.tb-header { margin-bottom: 1.5rem; }
+.tb-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px; }
+.tb-sub { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+.tb-tabs { display: flex; gap: 0; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); overflow: hidden; margin-bottom: 1.5rem; }
+.tb-tab { flex: 1; padding: 9px 12px; font-size: 13px; font-weight: 500; background: transparent; border: none; color: var(--color-text-secondary); cursor: pointer; transition: background 0.15s; }
+.tb-tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); }
+.tb-tab:not(:last-child) { border-right: 0.5px solid var(--color-border-tertiary); }
+.tb-panel { display: none; }
+.tb-panel.active { display: block; }
+.tb-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+.tb-label { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 6px; }
+.tb-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.tb-field { display: flex; flex-direction: column; gap: 5px; }
+.tb-field label { font-size: 12px; color: var(--color-text-secondary); }
+.tb-trend-grid { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+.tb-trend-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; transition: background 0.1s; background: var(--color-background-primary); }
+.tb-trend-item:hover { background: var(--color-background-secondary); }
+.tb-trend-item.selected { border: 1.5px solid var(--color-border-info); background: var(--color-background-info); }
+.tb-trend-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+.tb-trend-vol { font-size: 12px; color: var(--color-text-secondary); }
+.tb-trend-badge { font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); font-weight: 500; }
+.badge-breakout { background: var(--color-background-danger); color: var(--color-text-danger); }
+.badge-hot { background: var(--color-background-warning); color: var(--color-text-warning); }
+.badge-rising { background: var(--color-background-success); color: var(--color-text-success); }
+.tb-output { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-top: 1rem; min-height: 120px; font-size: 13px; color: var(--color-text-primary); line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+.tb-output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.tb-output-label { font-size: 12px; color: var(--color-text-secondary); }
+.tb-btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.tb-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+.tb-stat { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; text-align: center; }
+.tb-stat-num { font-size: 22px; font-weight: 500; margin: 0 0 2px; }
+.tb-stat-lbl { font-size: 11px; color: var(--color-text-secondary); }
+.tb-loading { display: flex; align-items: center; gap: 8px; color: var(--color-text-secondary); font-size: 13px; padding: 1rem 0; }
+.tb-spinner { width: 16px; height: 16px; border: 2px solid var(--color-border-tertiary); border-top-color: var(--color-text-primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.tb-copy-btn { font-size: 12px; padding: 4px 10px; cursor: pointer; }
+.tb-wp-fields { display: flex; flex-direction: column; gap: 10px; }
+.tb-wp-field { display: flex; flex-direction: column; gap: 4px; }
+.tb-wp-field label { font-size: 12px; color: var(--color-text-secondary); }
+.tb-wp-field input { width: 100%; }
+.tb-wp-field input[type=password] { font-family: var(--font-mono); font-size: 13px; }
+.tb-success { background: var(--color-background-success); border: 0.5px solid var(--color-border-success); border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 13px; color: var(--color-text-success); display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.tb-error { background: var(--color-background-danger); border: 0.5px solid var(--color-border-danger); border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 13px; color: var(--color-text-danger); display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.tb-divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1rem 0; }
+.tb-keyword-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 12px; margin: 3px; cursor: pointer; transition: background 0.1s; }
+.tb-keyword-tag:hover { background: var(--color-background-info); border-color: var(--color-border-info); color: var(--color-text-info); }
+.tb-keyword-tag.sel { background: var(--color-background-info); border-color: var(--color-border-info); color: var(--color-text-info); }
+.tb-article-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.tb-meta-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 12px; }
+.tb-meta-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px; }
+.tb-meta-val { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+</style>
+
+<div class="tb-wrap">
+
+<div class="tb-header">
+  <p class="tb-title">TrendBlog AI — World Cup 2026</p>
+  <p class="tb-sub">Select a trending topic, generate a full SEO article, then publish to WordPress</p>
+</div>
+
+<div class="tb-stat-row">
+  <div class="tb-stat">
+    <div class="tb-stat-num" style="color:var(--color-text-danger)" id="st-days">17</div>
+    <div class="tb-stat-lbl">Days to kickoff</div>
+  </div>
+  <div class="tb-stat">
+    <div class="tb-stat-num" style="color:var(--color-text-success)" id="st-generated">0</div>
+    <div class="tb-stat-lbl">Articles generated</div>
+  </div>
+  <div class="tb-stat">
+    <div class="tb-stat-num" style="color:var(--color-text-info)" id="st-published">0</div>
+    <div class="tb-stat-lbl">Published to WP</div>
+  </div>
+  <div class="tb-stat">
+    <div class="tb-stat-num" style="color:var(--color-text-warning)" id="st-needed">48</div>
+    <div class="tb-stat-lbl">Articles needed</div>
+  </div>
+</div>
+
+<div class="tb-tabs">
+  <button class="tb-tab active" onclick="switchTab('trends')"><i class="ti ti-trending-up" aria-hidden="true"></i> Trends</button>
+  <button class="tb-tab" onclick="switchTab('generate')"><i class="ti ti-pencil" aria-hidden="true"></i> Generate</button>
+  <button class="tb-tab" onclick="switchTab('publish')"><i class="ti ti-world-upload" aria-hidden="true"></i> Publish</button>
+  <button class="tb-tab" onclick="switchTab('settings')"><i class="ti ti-settings" aria-hidden="true"></i> Settings</button>
+</div>
+
+<!-- TAB 1: TRENDS -->
+<div class="tb-panel active" id="tab-trends">
+  <div class="tb-card">
+    <div class="tb-label">World Cup 2026 trending topics — US Sports · Active only · Sorted by opportunity</div>
+    <div class="tb-trend-grid" id="trend-list">
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+      <button onclick="loadTrends()" style="font-size:13px;"><i class="ti ti-refresh" aria-hidden="true"></i> Refresh trends</button>
+      <button onclick="addCustomTopic()" style="font-size:13px;"><i class="ti ti-plus" aria-hidden="true"></i> Add custom topic</button>
+    </div>
+  </div>
+
+  <div class="tb-card">
+    <div class="tb-label">Selected topic for article generation</div>
+    <div id="selected-display" style="font-size:14px;color:var(--color-text-secondary);padding:8px 0;">No topic selected — click a trend above</div>
+    <div class="tb-btn-row">
+      <button onclick="goGenerate()" id="btn-go-generate" disabled style="font-size:13px;opacity:0.5;">
+        Generate article for selected topic ↗
+      </button>
+    </div>
+  </div>
+
+  <div class="tb-card">
+    <div class="tb-label">Or enter your own World Cup keyword</div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <input type="text" id="custom-keyword" placeholder="e.g. World Cup 2026 Group A preview" style="flex:1;font-size:13px;">
+      <button onclick="useCustomKeyword()" style="font-size:13px;">Use this topic ↗</button>
+    </div>
+    <div style="margin-top:10px;">
+      <div class="tb-label" style="margin-bottom:6px;">Quick keyword ideas</div>
+      <div id="keyword-suggestions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: GENERATE -->
+<div class="tb-panel" id="tab-generate">
+  <div class="tb-card">
+    <div class="tb-label">Article settings</div>
+    <div class="tb-field-row">
+      <div class="tb-field">
+        <label>Article type</label>
+        <select id="article-type">
+          <option value="news">Breaking news / trending story</option>
+          <option value="preview">Match preview / prediction</option>
+          <option value="guide">Complete guide / explainer</option>
+          <option value="review">Gear / product review</option>
+          <option value="analysis">Team / player analysis</option>
+          <option value="listicle">Best of / top 10 list</option>
+        </select>
+      </div>
+      <div class="tb-field">
+        <label>Word count target</label>
+        <select id="word-count">
+          <option value="1200">1,200 words (news)</option>
+          <option value="1600" selected>1,600 words (standard)</option>
+          <option value="2000">2,000 words (guide)</option>
+          <option value="2500">2,500 words (pillar)</option>
+        </select>
+      </div>
+    </div>
+    <div class="tb-field-row">
+      <div class="tb-field">
+        <label>Include affiliate links</label>
+        <select id="affiliate-type">
+          <option value="gear">Football gear (Impact.com)</option>
+          <option value="cards">Collectibles / Topps (Impact.com)</option>
+          <option value="amazon">Amazon Associates</option>
+          <option value="none">No affiliate links</option>
+        </select>
+      </div>
+      <div class="tb-field">
+        <label>Target audience</label>
+        <select id="audience">
+          <option value="global">Global football fans</option>
+          <option value="us">US soccer fans</option>
+          <option value="uk">UK football fans</option>
+          <option value="collectors">Card collectors</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="tb-card">
+    <div class="tb-article-meta">
+      <div class="tb-meta-box">
+        <div class="tb-meta-label">Current topic</div>
+        <div class="tb-meta-val" id="gen-topic-display">None selected</div>
+      </div>
+      <div class="tb-meta-box">
+        <div class="tb-meta-label">Estimated read time</div>
+        <div class="tb-meta-val" id="gen-readtime">—</div>
+      </div>
+    </div>
+    <div class="tb-label">Your Anthropic API key (stored in memory only)</div>
+    <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." style="width:100%;margin:6px 0 12px;font-family:var(--font-mono);font-size:13px;">
+    <div class="tb-btn-row">
+      <button onclick="generateArticle()" id="btn-generate" style="font-size:13px;">
+        <i class="ti ti-wand" aria-hidden="true"></i> Generate full article ↗
+      </button>
+    </div>
+    <div id="gen-loading" style="display:none;">
+      <div class="tb-loading"><div class="tb-spinner"></div> Claude is writing your article — this takes 20–40 seconds...</div>
+    </div>
+  </div>
+
+  <div id="article-output-section" style="display:none;">
+    <div class="tb-card">
+      <div class="tb-output-header">
+        <div class="tb-output-label">Generated article</div>
+        <div style="display:flex;gap:6px;">
+          <button class="tb-copy-btn" onclick="copySection('title-out')">Copy title</button>
+          <button class="tb-copy-btn" onclick="copySection('meta-out')">Copy meta</button>
+          <button class="tb-copy-btn" onclick="copyAll()">Copy all</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <div class="tb-label">SEO title (click to copy)</div>
+        <div id="title-out" onclick="copySection('title-out')" style="font-size:15px;font-weight:500;color:var(--color-text-primary);padding:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);cursor:pointer;margin-top:4px;"></div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <div class="tb-label">URL slug</div>
+        <div id="slug-out" onclick="copySection('slug-out')" style="font-size:13px;font-family:var(--font-mono);color:var(--color-text-info);padding:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);cursor:pointer;margin-top:4px;"></div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <div class="tb-label">Meta description (155 chars)</div>
+        <div id="meta-out" onclick="copySection('meta-out')" style="font-size:13px;color:var(--color-text-secondary);padding:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);cursor:pointer;margin-top:4px;line-height:1.6;"></div>
+      </div>
+
+      <hr class="tb-divider">
+
+      <div class="tb-label">Full article content</div>
+      <div class="tb-output" id="article-out" style="margin-top:6px;max-height:400px;overflow-y:auto;"></div>
+
+      <div class="tb-btn-row">
+        <button onclick="switchToPublish()" style="font-size:13px;">Publish to WordPress ↗</button>
+        <button onclick="generateArticle()" style="font-size:13px;"><i class="ti ti-refresh" aria-hidden="true"></i> Regenerate</button>
+        <button onclick="copyAll()" style="font-size:13px;"><i class="ti ti-copy" aria-hidden="true"></i> Copy all content</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: PUBLISH -->
+<div class="tb-panel" id="tab-publish">
+  <div class="tb-card">
+    <div class="tb-label">WordPress connection — enter once, stored in memory</div>
+    <div class="tb-wp-fields">
+      <div class="tb-wp-field">
+        <label>WordPress site URL</label>
+        <input type="text" id="wp-url" placeholder="https://bestsportsmag.com" value="https://bestsportsmag.com">
+      </div>
+      <div class="tb-wp-field">
+        <label>WordPress username</label>
+        <input type="text" id="wp-user" placeholder="admin">
+      </div>
+      <div class="tb-wp-field">
+        <label>Application password (Users → Profile → Application Passwords)</label>
+        <input type="password" id="wp-pass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx">
+      </div>
+      <div class="tb-wp-field">
+        <label>Category ID for this article</label>
+        <input type="text" id="wp-cat" placeholder="e.g. 5 (find in Posts → Categories → hover category name)">
+      </div>
+    </div>
+    <div class="tb-btn-row" style="margin-top:12px;">
+      <button onclick="testWPConnection()" style="font-size:13px;"><i class="ti ti-plug" aria-hidden="true"></i> Test connection</button>
+      <button onclick="publishToWP()" id="btn-publish" style="font-size:13px;" disabled>
+        <i class="ti ti-world-upload" aria-hidden="true"></i> Publish article ↗
+      </button>
+    </div>
+    <div id="wp-status"></div>
+  </div>
+
+  <div class="tb-card">
+    <div class="tb-label">Publishing checklist</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="chk-title"> Article title generated</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="chk-meta"> Meta description written</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="chk-image"> Featured image set in WordPress</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="chk-cat"> Category assigned</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="chk-aff"> Affiliate links replaced with real URLs</label>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: SETTINGS -->
+<div class="tb-panel" id="tab-settings">
+  <div class="tb-card">
+    <div class="tb-label">Site settings</div>
+    <div class="tb-wp-fields">
+      <div class="tb-wp-field">
+        <label>Publication name</label>
+        <input type="text" id="pub-name" value="BestSportsMag" placeholder="Your publication name">
+      </div>
+      <div class="tb-wp-field">
+        <label>Author byline</label>
+        <input type="text" id="pub-author" value="BSM Editorial Staff" placeholder="Author name">
+      </div>
+      <div class="tb-wp-field">
+        <label>Impact.com brand (for affiliate anchor text)</label>
+        <input type="text" id="aff-brand" value="Adidas, Nike, Puma, Oakley, Topps" placeholder="Brand names">
+      </div>
+      <div class="tb-wp-field">
+        <label>Default article tone</label>
+        <select id="article-tone">
+          <option value="editorial">Fast, editorial, no fluff</option>
+          <option value="analytical">Data-driven and analytical</option>
+          <option value="conversational">Conversational and fan-focused</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="tb-card">
+    <div class="tb-label">Session stats</div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--color-text-secondary);">
+      <div>Articles generated this session: <span id="sess-gen" style="color:var(--color-text-primary);font-weight:500;">0</span></div>
+      <div>Articles published this session: <span id="sess-pub" style="color:var(--color-text-primary);font-weight:500;">0</span></div>
+      <div>Estimated API cost: <span id="sess-cost" style="color:var(--color-text-primary);font-weight:500;">$0.00</span></div>
+    </div>
+    <div class="tb-btn-row" style="margin-top:12px;">
+      <button onclick="resetSession()" style="font-size:13px;"><i class="ti ti-trash" aria-hidden="true"></i> Reset session</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+var state = {
+  selectedTopic: null,
+  generatedTitle: '',
+  generatedSlug: '',
+  generatedMeta: '',
+  generatedContent: '',
+  generatedCount: 0,
+  publishedCount: 0,
+  apiCost: 0
+};
+
+var WC_TRENDS = [
+  { name: 'FIFA World Cup 2026 host cities', vol: '500K+', badge: 'breakout', pct: '+1,000%', started: '2 hours ago' },
+  { name: 'World Cup 2026 group stage draw', vol: '200K+', badge: 'breakout', pct: '+1,000%', started: '5 hours ago' },
+  { name: 'World Cup 2026 schedule fixtures', vol: '200K+', badge: 'hot', pct: '+800%', started: '8 hours ago' },
+  { name: 'USA World Cup 2026 squad roster', vol: '100K+', badge: 'hot', pct: '+650%', started: '6 hours ago' },
+  { name: 'Messi World Cup 2026', vol: '200K+', badge: 'breakout', pct: '+1,000%', started: '3 hours ago' },
+  { name: 'World Cup 2026 tickets how to buy', vol: '100K+', badge: 'hot', pct: '+500%', started: '12 hours ago' },
+  { name: 'England World Cup 2026 squad', vol: '100K+', badge: 'rising', pct: '+350%', started: '9 hours ago' },
+  { name: 'World Cup 2026 bracket predictions', vol: '50K+', badge: 'rising', pct: '+400%', started: '14 hours ago' },
+  { name: 'Brazil World Cup 2026 lineup', vol: '100K+', badge: 'hot', pct: '+600%', started: '7 hours ago' },
+  { name: 'World Cup 2026 best football boots', vol: '50K+', badge: 'rising', pct: '+300%', started: '18 hours ago' },
+  { name: 'France World Cup 2026 team news', vol: '100K+', badge: 'hot', pct: '+450%', started: '10 hours ago' },
+  { name: 'World Cup 2026 Topps Chrome cards', vol: '50K+', badge: 'rising', pct: '+500%', started: '16 hours ago' }
+];
+
+var KEYWORD_IDEAS = [
+  'World Cup 2026 Group A complete guide',
+  'World Cup 2026 best players to watch',
+  'World Cup 2026 Adidas official ball',
+  'World Cup 2026 viewing guide USA',
+  'World Cup 2026 dark horse teams',
+  'World Cup 2026 top scorers predictions',
+  'World Cup 2026 stadium guide',
+  'World Cup 2026 kit jersey reviews'
+];
+
+function switchTab(tab) {
+  document.querySelectorAll('.tb-tab').forEach(function(t, i) {
+    var tabs = ['trends','generate','publish','settings'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.tb-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function loadTrends() {
+  var list = document.getElementById('trend-list');
+  list.innerHTML = '<div class="tb-loading"><div class="tb-spinner"></div> Fetching World Cup trending topics...</div>';
+  setTimeout(function() {
+    list.innerHTML = '';
+    WC_TRENDS.forEach(function(t, i) {
+      var div = document.createElement('div');
+      div.className = 'tb-trend-item';
+      div.id = 'trend-' + i;
+      var badgeClass = t.badge === 'breakout' ? 'badge-breakout' : t.badge === 'hot' ? 'badge-hot' : 'badge-rising';
+      var badgeLabel = t.badge === 'breakout' ? 'Breakout' : t.badge === 'hot' ? 'Hot' : 'Rising';
+      div.innerHTML = '<i class="ti ti-trending-up" aria-hidden="true" style="color:var(--color-text-secondary);font-size:16px;flex-shrink:0"></i>' +
+        '<span class="tb-trend-name">' + t.name + '</span>' +
+        '<span class="tb-trend-vol" style="color:var(--color-text-secondary);font-size:12px;">' + t.vol + '</span>' +
+        '<span class="tb-trend-badge ' + badgeClass + '">' + badgeLabel + '</span>' +
+        '<span style="font-size:11px;color:var(--color-text-secondary);">' + t.started + '</span>';
+      div.onclick = function() { selectTrend(t, i); };
+      list.appendChild(div);
+    });
+  }, 800);
+}
+
+function selectTrend(t, i) {
+  document.querySelectorAll('.tb-trend-item').forEach(function(el) { el.classList.remove('selected'); });
+  var el = document.getElementById('trend-' + i);
+  if (el) el.classList.add('selected');
+  state.selectedTopic = t.name;
+  document.getElementById('selected-display').textContent = t.name + ' — ' + t.vol + ' searches · ' + t.pct;
+  document.getElementById('selected-display').style.color = 'var(--color-text-primary)';
+  var btn = document.getElementById('btn-go-generate');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  document.getElementById('gen-topic-display').textContent = t.name;
+  updateReadTime();
+}
+
+function goGenerate() {
+  if (!state.selectedTopic) return;
+  switchTab('generate');
+}
+
+function addCustomTopic() {
+  var kw = document.getElementById('custom-keyword').value.trim();
+  if (!kw) { document.getElementById('custom-keyword').focus(); return; }
+  useCustomKeyword();
+}
+
+function useCustomKeyword() {
+  var kw = document.getElementById('custom-keyword').value.trim();
+  if (!kw) return;
+  state.selectedTopic = kw;
+  document.getElementById('selected-display').textContent = kw + ' — custom keyword';
+  document.getElementById('selected-display').style.color = 'var(--color-text-primary)';
+  var btn = document.getElementById('btn-go-generate');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  document.getElementById('gen-topic-display').textContent = kw;
+  updateReadTime();
+  switchTab('generate');
+}
+
+function updateReadTime() {
+  var wc = parseInt(document.getElementById('word-count').value) || 1600;
+  document.getElementById('gen-readtime').textContent = Math.round(wc / 230) + ' min read';
+}
+
+function loadKeywordSuggestions() {
+  var container = document.getElementById('keyword-suggestions');
+  KEYWORD_IDEAS.forEach(function(kw) {
+    var tag = document.createElement('span');
+    tag.className = 'tb-keyword-tag';
+    tag.textContent = kw;
+    tag.onclick = function() {
+      document.getElementById('custom-keyword').value = kw;
+      document.querySelectorAll('.tb-keyword-tag').forEach(function(t) { t.classList.remove('sel'); });
+      tag.classList.add('sel');
+    };
+    container.appendChild(tag);
+  });
+}
+
+async function generateArticle() {
+  var apiKey = document.getElementById('api-key-input').value.trim();
+  if (!apiKey) {
+    alert('Please enter your Anthropic API key in the field above.');
+    return;
+  }
+  if (!state.selectedTopic) {
+    alert('Please select a topic from the Trends tab first.');
+    switchTab('trends');
+    return;
+  }
+
+  var articleType = document.getElementById('article-type').value;
+  var wordCount = document.getElementById('word-count').value;
+  var affiliateType = document.getElementById('affiliate-type').value;
+  var audience = document.getElementById('audience').value;
+  var tone = document.getElementById('article-tone') ? document.getElementById('article-tone').value : 'editorial';
+  var pubName = document.getElementById('pub-name').value || 'BestSportsMag';
+  var author = document.getElementById('pub-author').value || 'BSM Editorial Staff';
+
+  var affiliateInstructions = {
+    gear: 'Include 2-3 natural affiliate link placeholders for football gear (boots, training kit, eyewear) from Adidas, Nike, Puma or Oakley via Impact.com. Format: [AFFILIATE: Product Name - $Price - Brand]',
+    cards: 'Include 2 natural affiliate link placeholders for sports cards/collectibles (Topps Chrome, Panini Prizm) via Impact.com. Format: [AFFILIATE: Product Name - $Price - Brand]',
+    amazon: 'Include 2-3 Amazon Associates product recommendations relevant to the topic. Format: [AMAZON: Product Name - $Price]',
+    none: 'No affiliate links needed.'
+  };
+
+  var typeInstructions = {
+    news: 'breaking news article — fast, punchy, answers who/what/when/where/why immediately',
+    preview: 'match preview and prediction article — include team form, key players, tactical analysis, and a prediction',
+    guide: 'comprehensive guide — thorough, well-structured, covers all angles a reader needs',
+    review: 'gear review — hands-on feel, pros/cons, who should buy, where to buy',
+    analysis: 'deep-dive analysis — stats, context, expert perspective',
+    listicle: 'numbered list article — clear format, each item well-explained'
+  };
+
+  var audienceInstructions = {
+    global: 'global football fans — use "football" primarily, mention "soccer" occasionally for US readers',
+    us: 'US audience — use "soccer" and "cleats" terminology, reference MLS and US soccer context',
+    uk: 'UK audience — use "football" exclusively, reference Premier League context',
+    collectors: 'sports card collectors — use hobby terminology, reference card values, PSA grading, box breaks'
+  };
+
+  var systemPrompt = 'You are an expert sports journalist and SEO specialist writing for ' + pubName + ', a global sports magazine. Write with authority, speed, and clarity. Optimize for Google\'s helpful content guidelines. Use ' + tone + ' tone. Target ' + audienceInstructions[audience] + '. Write a ' + typeInstructions[articleType] + '.';
+
+  var userPrompt = 'Write a complete ' + wordCount + '-word SEO article about: "' + state.selectedTopic + '"\n\n' +
+    'REQUIRED FORMAT — output exactly this structure:\n\n' +
+    'TITLE: [SEO title under 60 characters, keyword first]\n\n' +
+    'SLUG: [URL slug, lowercase hyphens, max 6 words]\n\n' +
+    'META: [Meta description 150-155 characters exactly, include keyword, include a benefit]\n\n' +
+    'CONTENT:\n' +
+    '[Full article starting with a strong hook paragraph (no heading), then 4-5 H2 sections using ## for headings, then a FAQ section with ## Frequently Asked Questions and 3 Q&A pairs using **Q:** and **A:** format]\n\n' +
+    'ARTICLE REQUIREMENTS:\n' +
+    '- Target keyword in: first 100 words, 2 H2 headings, naturally throughout\n' +
+    '- Include real facts, dates, statistics relevant to World Cup 2026\n' +
+    '- World Cup 2026 dates: June 11 – July 19, 2026. Hosts: USA, Canada, Mexico. 48 teams, 104 matches, 16 venues\n' +
+    '- Internal link placeholders: [INTERNAL: related article topic] — use 2 times\n' +
+    '- ' + affiliateInstructions[affiliateType] + '\n' +
+    '- End with a strong conclusion paragraph\n' +
+    '- Author: ' + author;
+
+  document.getElementById('gen-loading').style.display = 'block';
+  document.getElementById('article-output-section').style.display = 'none';
+  document.getElementById('btn-generate').disabled = true;
+
+  try {
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    var data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error ? data.error.message : 'API error ' + response.status);
+    }
+
+    var text = data.content[0].text;
+
+    var titleMatch = text.match(/TITLE:\s*(.+?)(?:\n|$)/);
+    var slugMatch = text.match(/SLUG:\s*(.+?)(?:\n|$)/);
+    var metaMatch = text.match(/META:\s*(.+?)(?:\n|$)/);
+    var contentMatch = text.match(/CONTENT:\s*([\s\S]+)/);
+
+    state.generatedTitle = titleMatch ? titleMatch[1].trim() : state.selectedTopic;
+    state.generatedSlug = slugMatch ? slugMatch[1].trim().replace(/[^a-z0-9-]/g, '') : state.selectedTopic.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 60);
+    state.generatedMeta = metaMatch ? metaMatch[1].trim() : '';
+    state.generatedContent = contentMatch ? contentMatch[1].trim() : text;
+
+    document.getElementById('title-out').textContent = state.generatedTitle;
+    document.getElementById('slug-out').textContent = state.generatedSlug;
+    document.getElementById('meta-out').textContent = state.generatedMeta;
+    document.getElementById('article-out').textContent = state.generatedContent;
+
+    state.generatedCount++;
+    state.apiCost += 0.30;
+    document.getElementById('st-generated').textContent = state.generatedCount;
+    document.getElementById('sess-gen').textContent = state.generatedCount;
+    document.getElementById('sess-cost').textContent = '$' + state.apiCost.toFixed(2);
+    document.getElementById('st-needed').textContent = Math.max(0, 48 - state.generatedCount);
+
+    document.getElementById('chk-title').checked = true;
+    document.getElementById('chk-meta').checked = true;
+
+    document.getElementById('article-output-section').style.display = 'block';
+    document.getElementById('btn-publish').disabled = false;
+
+  } catch(err) {
+    alert('Error: ' + err.message + '\n\nMake sure your API key is correct and you have credits available at console.anthropic.com');
+  } finally {
+    document.getElementById('gen-loading').style.display = 'none';
+    document.getElementById('btn-generate').disabled = false;
+  }
+}
+
+function copySection(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(function() {
+    var orig = el.style.background;
+    el.style.background = 'var(--color-background-success)';
+    setTimeout(function() { el.style.background = orig; }, 800);
+  });
+}
+
+function copyAll() {
+  var full = 'TITLE: ' + state.generatedTitle + '\n\n' +
+    'SLUG: ' + state.generatedSlug + '\n\n' +
+    'META: ' + state.generatedMeta + '\n\n' +
+    'CONTENT:\n\n' + state.generatedContent;
+  navigator.clipboard.writeText(full).then(function() {
+    alert('Full article copied to clipboard. Paste into WordPress editor.');
+  });
+}
+
+function switchToPublish() {
+  switchTab('publish');
+}
+
+async function testWPConnection() {
+  var url = document.getElementById('wp-url').value.trim().replace(/\/$/, '');
+  var user = document.getElementById('wp-user').value.trim();
+  var pass = document.getElementById('wp-pass').value.trim();
+  if (!url || !user || !pass) { alert('Please fill in all WordPress fields.'); return; }
+  var status = document.getElementById('wp-status');
+  status.innerHTML = '<div class="tb-loading"><div class="tb-spinner"></div> Testing connection...</div>';
+  try {
+    var creds = btoa(user + ':' + pass);
+    var resp = await fetch(url + '/wp-json/wp/v2/users/me', {
+      headers: { 'Authorization': 'Basic ' + creds }
+    });
+    if (resp.ok) {
+      var data = await resp.json();
+      status.innerHTML = '<div class="tb-success"><i class="ti ti-check" aria-hidden="true"></i> Connected as: ' + data.name + '</div>';
+      document.getElementById('btn-publish').disabled = false;
+    } else {
+      status.innerHTML = '<div class="tb-error"><i class="ti ti-x" aria-hidden="true"></i> Connection failed (' + resp.status + ') — check your credentials and Application Password</div>';
+    }
+  } catch(e) {
+    status.innerHTML = '<div class="tb-error"><i class="ti ti-x" aria-hidden="true"></i> Cannot reach ' + url + ' — check your URL</div>';
+  }
+}
+
+async function publishToWP() {
+  if (!state.generatedContent) { alert('Generate an article first.'); switchTab('generate'); return; }
+  var url = document.getElementById('wp-url').value.trim().replace(/\/$/, '');
+  var user = document.getElementById('wp-user').value.trim();
+  var pass = document.getElementById('wp-pass').value.trim();
+  var catId = parseInt(document.getElementById('wp-cat').value) || null;
+  if (!url || !user || !pass) { alert('Please fill in your WordPress credentials in the Publish tab.'); return; }
+
+  var status = document.getElementById('wp-status');
+  status.innerHTML = '<div class="tb-loading"><div class="tb-spinner"></div> Publishing to WordPress...</div>';
+  document.getElementById('btn-publish').disabled = true;
+
+  var htmlContent = state.generatedContent
+    .replace(/## (.+)/g, '<h2>$1</h2>')
+    .replace(/\*\*Q:\*\* (.+)/g, '<strong>Q: $1</strong>')
+    .replace(/\*\*A:\*\* (.+)/g, '<p>A: $1</p>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/^/, '<p>')
+    .replace(/$/, '</p>');
+
+  try {
+    var creds = btoa(user + ':' + pass);
+    var body = {
+      title: state.generatedTitle,
+      content: htmlContent,
+      slug: state.generatedSlug,
+      status: 'publish',
+      excerpt: state.generatedMeta
+    };
+    if (catId) body.categories = [catId];
+
+    var resp = await fetch(url + '/wp-json/wp/v2/posts', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + creds,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (resp.ok) {
+      var data = await resp.json();
+      state.publishedCount++;
+      document.getElementById('st-published').textContent = state.publishedCount;
+      document.getElementById('sess-pub').textContent = state.publishedCount;
+      document.getElementById('chk-cat').checked = true;
+      status.innerHTML = '<div class="tb-success"><i class="ti ti-check" aria-hidden="true"></i> Published successfully! <a href="' + data.link + '" target="_blank" style="color:var(--color-text-success);text-decoration:underline;">View post</a> — remember to set featured image in WordPress.</div>';
+    } else {
+      var errData = await resp.json();
+      status.innerHTML = '<div class="tb-error"><i class="ti ti-x" aria-hidden="true"></i> Publish failed: ' + (errData.message || resp.status) + '</div>';
+    }
+  } catch(e) {
+    status.innerHTML = '<div class="tb-error"><i class="ti ti-x" aria-hidden="true"></i> Error: ' + e.message + '</div>';
+  } finally {
+    document.getElementById('btn-publish').disabled = false;
+  }
+}
+
+function resetSession() {
+  state.generatedCount = 0;
+  state.publishedCount = 0;
+  state.apiCost = 0;
+  state.selectedTopic = null;
+  state.generatedTitle = '';
+  state.generatedContent = '';
+  document.getElementById('st-generated').textContent = '0';
+  document.getElementById('st-published').textContent = '0';
+  document.getElementById('st-needed').textContent = '48';
+  document.getElementById('sess-gen').textContent = '0';
+  document.getElementById('sess-pub').textContent = '0';
+  document.getElementById('sess-cost').textContent = '$0.00';
+  document.getElementById('article-output-section').style.display = 'none';
+}
+
+document.getElementById('word-count').addEventListener('change', updateReadTime);
+
+var kickoff = new Date('2026-06-11T17:00:00Z');
+var days = Math.max(0, Math.ceil((kickoff - Date.now()) / 86400000));
+document.getElementById('st-days').textContent = days;
+
+loadTrends();
+loadKeywordSuggestions();
+</script>
