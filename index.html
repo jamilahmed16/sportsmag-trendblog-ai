@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TrendBlog AI — World Cup 2026</title>
+<title>TrendBlog AI v2 — World Cup 2026</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#e8e8e8;font-size:15px;line-height:1.6}
@@ -37,7 +37,6 @@ h1{font-size:22px;font-weight:700;color:#E8FF00;margin-bottom:4px}
 .field label{font-size:12px;color:#666}
 select,input{background:#0d0d0d;border:1px solid #222;border-radius:6px;color:#e8e8e8;padding:9px 12px;font-size:13px;width:100%;outline:none;transition:border-color .15s}
 select:focus,input:focus{border-color:#E8FF00}
-input[type=password]{font-family:monospace}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s}
 .btn-primary{background:#E8FF00;color:#000}
 .btn-primary:hover{opacity:.85}
@@ -45,17 +44,17 @@ input[type=password]{font-family:monospace}
 .btn-ghost{background:#1a1a1a;color:#ccc;border:1px solid #333}
 .btn-ghost:hover{border-color:#555}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.output-box{background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:420px;overflow-y:auto;margin-top:8px;cursor:pointer;transition:border-color .15s}
-.output-box:hover{border-color:#444}
-.output-label{font-size:12px;color:#555;margin-bottom:4px}
+.output-box{background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:420px;overflow-y:auto;margin-top:8px;cursor:pointer}
 .output-val{font-size:14px;font-weight:600;color:#e8e8e8;background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px 12px;cursor:pointer;transition:border-color .15s;margin-top:4px}
 .output-val:hover{border-color:#E8FF00}
 .output-slug{font-family:monospace;color:#00b4ff;font-size:13px}
+.output-label{font-size:12px;color:#555;margin-bottom:4px}
 .loading{display:flex;align-items:center;gap:10px;color:#666;font-size:13px;padding:12px 0}
 .spinner{width:16px;height:16px;border:2px solid #333;border-top-color:#E8FF00;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 .success{background:#002200;border:1px solid #00aa00;border-radius:6px;padding:10px 14px;font-size:13px;color:#00cc66;margin-top:10px}
 .error{background:#220000;border:1px solid #aa0000;border-radius:6px;padding:10px 14px;font-size:13px;color:#ff6b6b;margin-top:10px}
+.info{background:#001a2a;border:1px solid #004466;border-radius:6px;padding:10px 14px;font-size:13px;color:#66aacc;margin-top:10px}
 .proxy-status{display:flex;align-items:center;gap:8px;font-size:12px;color:#555;margin-bottom:16px;padding:8px 12px;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:6px}
 .proxy-dot{width:8px;height:8px;border-radius:50%;background:#333;flex-shrink:0}
 .proxy-dot.online{background:#00cc66;box-shadow:0 0 6px #00cc66}
@@ -64,31 +63,28 @@ input[type=password]{font-family:monospace}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .kw-tag{display:inline-flex;align-items:center;padding:4px 10px;background:#111;border:1px solid #222;border-radius:4px;font-size:12px;margin:3px;cursor:pointer;transition:border-color .15s,color .15s}
 .kw-tag:hover,.kw-tag.sel{border-color:#E8FF00;color:#E8FF00}
+.wp-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.wp-field label{font-size:12px;color:#666}
 .checklist{display:flex;flex-direction:column;gap:8px}
 .checklist label{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:#aaa}
 .checklist input[type=checkbox]{width:16px;height:16px;accent-color:#E8FF00;flex-shrink:0}
-.divider{border:none;border-top:1px solid #1a1a1a;margin:14px 0}
-.wp-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
-.wp-field label{font-size:12px;color:#666}
 a{color:#E8FF00;text-decoration:none}
-a:hover{text-decoration:underline}
-.proxy-url{font-size:11px;font-family:monospace;color:#00b4ff}
+.html-preview{background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:14px;font-size:12px;font-family:monospace;line-height:1.6;max-height:300px;overflow-y:auto;color:#aaa;margin-top:8px;word-break:break-all}
+.version-badge{background:#1a1a00;border:1px solid #333300;color:#E8FF00;font-size:10px;padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:500;letter-spacing:.08em}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<h1>TrendBlog AI — World Cup 2026</h1>
-<p class="sub">Select a trending topic → Generate a full SEO article → Publish to WordPress</p>
+<h1>TrendBlog AI — World Cup 2026 <span class="version-badge">v2.0 — BSM Styled Output</span></h1>
+<p class="sub">Generates BSM-branded HTML automatically → publishes directly to WordPress with your site's style guide applied</p>
 
-<!-- Proxy status -->
 <div class="proxy-status">
   <div class="proxy-dot checking" id="proxy-dot"></div>
   <span id="proxy-status-text">Checking proxy server...</span>
-  <span class="proxy-url">https://sportsmag-trendblog-proxy.onrender.com</span>
+  <span style="font-size:11px;font-family:monospace;color:#00b4ff;margin-left:auto">https://sportsmag-trendblog-proxy.onrender.com</span>
 </div>
 
-<!-- Stats -->
 <div class="stats">
   <div class="stat"><div class="stat-num" style="color:#ff6b6b" id="st-days">11</div><div class="stat-lbl">Days to kickoff</div></div>
   <div class="stat"><div class="stat-num" style="color:#00cc66" id="st-gen">0</div><div class="stat-lbl">Generated</div></div>
@@ -96,7 +92,6 @@ a:hover{text-decoration:underline}
   <div class="stat"><div class="stat-num" style="color:#ffa500" id="st-needed">48</div><div class="stat-lbl">Articles needed</div></div>
 </div>
 
-<!-- Tabs -->
 <div class="tabs">
   <button class="tab active" onclick="switchTab('trends')">📈 Trends</button>
   <button class="tab" onclick="switchTab('generate')">✍️ Generate</button>
@@ -104,25 +99,22 @@ a:hover{text-decoration:underline}
   <button class="tab" onclick="switchTab('settings')">⚙️ Settings</button>
 </div>
 
-<!-- TAB: TRENDS -->
+<!-- TRENDS -->
 <div class="panel active" id="tab-trends">
   <div class="card">
     <div class="card-label">World Cup 2026 — Trending Now · US Sports · Active Only</div>
     <div id="trend-list"></div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="loadTrends()">🔄 Refresh</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('custom-kw').focus()">+ Custom topic</button>
     </div>
   </div>
-
   <div class="card">
     <div class="card-label">Selected topic</div>
-    <div id="selected-display" style="font-size:14px;color:#555;padding:6px 0">No topic selected — click a trend above</div>
+    <div id="selected-display" style="font-size:14px;color:#555;padding:6px 0">No topic selected</div>
     <div class="btn-row">
-      <button class="btn btn-primary" id="btn-go-gen" onclick="switchTab('generate')" disabled style="opacity:.4">Generate article for selected topic →</button>
+      <button class="btn btn-primary" id="btn-go-gen" onclick="switchTab('generate')" disabled style="opacity:.4">Generate article →</button>
     </div>
   </div>
-
   <div class="card">
     <div class="card-label">Or enter your own keyword</div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -134,10 +126,10 @@ a:hover{text-decoration:underline}
   </div>
 </div>
 
-<!-- TAB: GENERATE -->
+<!-- GENERATE -->
 <div class="panel" id="tab-generate">
   <div class="card">
-    <div class="card-label">Article settings</div>
+    <div class="card-label" style="margin-bottom:8px">Article settings</div>
     <div class="field-row">
       <div class="field">
         <label>Article type</label>
@@ -153,10 +145,10 @@ a:hover{text-decoration:underline}
       <div class="field">
         <label>Word count</label>
         <select id="word-count">
-          <option value="1200">1,200 words — news</option>
-          <option value="1600" selected>1,600 words — standard</option>
-          <option value="2000">2,000 words — guide</option>
-          <option value="2500">2,500 words — pillar</option>
+          <option value="1200">1,200 words</option>
+          <option value="1600" selected>1,600 words</option>
+          <option value="2000">2,000 words</option>
+          <option value="2500">2,500 words</option>
         </select>
       </div>
     </div>
@@ -189,30 +181,33 @@ a:hover{text-decoration:underline}
         <div id="gen-topic" style="font-size:14px;font-weight:600;color:#E8FF00">None selected</div>
       </div>
       <div style="text-align:right">
-        <div class="card-label">Read time</div>
+        <div class="card-label">Estimated read time</div>
         <div id="gen-readtime" style="font-size:14px;font-weight:600">—</div>
       </div>
     </div>
+    <div class="info" style="margin-bottom:12px">
+      ✅ <strong>v2.0:</strong> Articles are now automatically converted to BSM-styled HTML before publishing. H2 headings get your lime accent border. Affiliate placeholders become styled inline links. FAQ sections get schema markup. No manual formatting needed.
+    </div>
     <div class="btn-row">
-      <button class="btn btn-primary" id="btn-gen" onclick="generateArticle()">✍️ Generate full article</button>
+      <button class="btn btn-primary" id="btn-gen" onclick="generateArticle()">✍️ Generate BSM-styled article</button>
     </div>
     <div id="gen-loading" style="display:none">
-      <div class="loading"><div class="spinner"></div>Claude is writing your article — 20–40 seconds...</div>
+      <div class="loading"><div class="spinner"></div>Claude is writing and styling your article — 20–40 seconds...</div>
     </div>
   </div>
 
   <div id="article-section" style="display:none">
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div class="card-label">Generated article</div>
+        <div class="card-label">Generated article — BSM styled HTML ready</div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="copyField('out-title')">Copy title</button>
           <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="copyField('out-meta')">Copy meta</button>
-          <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="copyAll()">Copy all</button>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="copyRaw()">Copy raw text</button>
         </div>
       </div>
 
-      <div class="output-label">SEO Title <span style="color:#555;font-size:11px">(click to copy)</span></div>
+      <div class="output-label">SEO Title</div>
       <div class="output-val" id="out-title" onclick="copyField('out-title')"></div>
 
       <div class="output-label" style="margin-top:10px">URL Slug</div>
@@ -221,71 +216,82 @@ a:hover{text-decoration:underline}
       <div class="output-label" style="margin-top:10px">Meta Description</div>
       <div class="output-val" id="out-meta" onclick="copyField('out-meta')" style="font-size:13px;color:#aaa"></div>
 
-      <hr class="divider">
+      <div class="output-label" style="margin-top:14px">BSM Styled HTML Preview <span style="color:#555;font-size:11px">(what gets published to WordPress)</span></div>
+      <div class="html-preview" id="out-html"></div>
 
-      <div class="output-label">Full Article <span style="color:#555;font-size:11px">(scroll to read)</span></div>
+      <div class="output-label" style="margin-top:14px">Raw article text</div>
       <div class="output-box" id="out-content"></div>
 
       <div class="btn-row">
         <button class="btn btn-primary" onclick="switchTab('publish')">Publish to WordPress →</button>
         <button class="btn btn-ghost" onclick="generateArticle()">🔄 Regenerate</button>
-        <button class="btn btn-ghost" onclick="copyAll()">📋 Copy all</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TAB: PUBLISH -->
+<!-- PUBLISH -->
 <div class="panel" id="tab-publish">
   <div class="card">
     <div class="card-label">WordPress connection</div>
     <div class="wp-field">
       <label>Site URL</label>
-      <input type="text" id="wp-url" placeholder="https://bestsportsmag.com" value="https://bestsportsmag.com">
+      <input type="text" id="wp-url" value="https://bestsportsmag.com">
     </div>
     <div class="wp-field">
       <label>Username</label>
       <input type="text" id="wp-user" placeholder="admin">
     </div>
     <div class="wp-field">
-      <label>Application Password — WordPress Admin → Users → Profile → Application Passwords</label>
+      <label>Application Password</label>
       <input type="password" id="wp-pass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx">
     </div>
     <div class="wp-field">
-      <label>Category ID — Posts → Categories → hover name to see ID in URL</label>
+      <label>Category ID</label>
       <input type="text" id="wp-cat" placeholder="e.g. 5">
     </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="testWP()">🔌 Test connection</button>
-      <button class="btn btn-primary" id="btn-pub" onclick="publishWP()" disabled style="opacity:.4">🚀 Publish article</button>
+      <button class="btn btn-primary" id="btn-pub" onclick="publishWP()" disabled style="opacity:.4">🚀 Publish with BSM styling</button>
     </div>
     <div id="wp-status"></div>
   </div>
 
   <div class="card">
-    <div class="card-label">Pre-publish checklist</div>
+    <div class="card-label">What gets published</div>
+    <div style="font-size:13px;color:#aaa;line-height:1.8">
+      ✅ BSM-styled HTML with <code style="color:#E8FF00">.bsm-post-h2</code> classes on headings<br>
+      ✅ Lime accent border on all H2 sections (via your CSS)<br>
+      ✅ Affiliate placeholders converted to styled inline links<br>
+      ✅ FAQ section with Schema.org markup for rich results<br>
+      ✅ Proper paragraph and list formatting<br>
+      ✅ Internal link placeholders styled as BSM links
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">After publishing checklist</div>
     <div class="checklist">
-      <label><input type="checkbox" id="chk-1"> Article title and meta generated</label>
-      <label><input type="checkbox" id="chk-2"> Category ID entered correctly</label>
-      <label><input type="checkbox" id="chk-3"> Featured image set in WordPress after publishing</label>
-      <label><input type="checkbox" id="chk-4"> Affiliate links replaced with real Impact.com URLs</label>
-      <label><input type="checkbox" id="chk-5"> Internal link placeholders updated</label>
+      <label><input type="checkbox" id="chk-1"> Set featured image in WordPress (Media Library)</label>
+      <label><input type="checkbox" id="chk-2"> Replace affiliate link placeholders with real Impact.com URLs</label>
+      <label><input type="checkbox" id="chk-3"> Replace internal link placeholders with real post URLs</label>
+      <label><input type="checkbox" id="chk-4"> Add Yoast SEO meta description</label>
+      <label><input type="checkbox" id="chk-5"> Assign correct category and tags</label>
     </div>
   </div>
 </div>
 
-<!-- TAB: SETTINGS -->
+<!-- SETTINGS -->
 <div class="panel" id="tab-settings">
   <div class="card">
     <div class="card-label">Proxy server</div>
     <div class="wp-field">
-      <label>Proxy URL (your Render.com server)</label>
+      <label>Proxy URL</label>
       <input type="text" id="proxy-url" value="https://sportsmag-trendblog-proxy.onrender.com">
     </div>
-    <button class="btn btn-ghost" onclick="checkProxy()" style="margin-top:4px">Check proxy status</button>
+    <button class="btn btn-ghost" onclick="checkProxy()" style="margin-top:4px">Check status</button>
     <div id="proxy-check-result" style="margin-top:8px"></div>
   </div>
-
   <div class="card">
     <div class="card-label">Publication settings</div>
     <div class="field-row">
@@ -298,10 +304,6 @@ a:hover{text-decoration:underline}
         <input type="text" id="pub-author" value="BSM Editorial Staff">
       </div>
     </div>
-    <div class="wp-field">
-      <label>Affiliate brands (for link placeholders)</label>
-      <input type="text" id="aff-brands" value="Adidas, Nike, Puma, Oakley, Topps, Panini">
-    </div>
     <div class="field">
       <label>Default tone</label>
       <select id="tone">
@@ -311,7 +313,6 @@ a:hover{text-decoration:underline}
       </select>
     </div>
   </div>
-
   <div class="card">
     <div class="card-label">Session stats</div>
     <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#aaa;margin-bottom:14px">
@@ -323,21 +324,11 @@ a:hover{text-decoration:underline}
   </div>
 </div>
 
-</div><!-- /wrap -->
+</div>
 
 <script>
 var PROXY = 'https://sportsmag-trendblog-proxy.onrender.com';
-
-var state = {
-  topic: null,
-  title: '',
-  slug: '',
-  meta: '',
-  content: '',
-  genCount: 0,
-  pubCount: 0,
-  cost: 0
-};
+var state = { topic:null, title:'', slug:'', meta:'', content:'', styledHtml:'', genCount:0, pubCount:0, cost:0 };
 
 var TRENDS = [
   { name:'FIFA World Cup 2026 host cities guide', vol:'500K+', badge:'breakout', pct:'+1,000%', started:'2h ago' },
@@ -359,36 +350,35 @@ var KW_IDEAS = [
   'World Cup 2026 best players to watch',
   'World Cup 2026 stadiums and venues guide',
   'How to watch World Cup 2026 in USA',
-  'World Cup 2026 dark horse team predictions',
   'World Cup 2026 top scorers predictions',
   'Best World Cup 2026 football boots',
-  'World Cup 2026 collectibles cards to buy'
+  'World Cup 2026 collectibles cards to buy',
+  'World Cup 2026 dark horse teams'
 ];
 
 var TYPE_MAP = {
-  news:'breaking news article answering who, what, when, where, why immediately',
+  news:'breaking news article — answer who, what, when, where, why in the first paragraph',
   preview:'match preview with team form, key players, tactical analysis, and a clear prediction',
-  guide:'comprehensive guide covering all angles a reader needs to know',
-  review:'hands-on gear review with pros, cons, who should buy, and where to buy',
-  analysis:'deep-dive analysis with stats, historical context, and expert perspective',
-  listicle:'numbered list article with each item clearly explained and justified'
+  guide:'comprehensive guide covering all angles a reader needs',
+  review:'hands-on gear review with pros, cons, who should buy, where to buy',
+  analysis:'deep-dive analysis with stats, context, and expert perspective',
+  listicle:'numbered list article with each item clearly explained'
 };
 
 var AFF_MAP = {
-  gear:'Include 2-3 natural affiliate link placeholders for football gear (boots, training kit, eyewear) from Adidas, Nike, Puma or Oakley via Impact.com. Format: [AFFILIATE: Product Name — $Price — Brand — via Impact.com]',
-  cards:'Include 2 natural affiliate link placeholders for sports cards/collectibles (Topps Chrome, Panini Prizm) via Impact.com. Format: [AFFILIATE: Product Name — $Price — Brand — via Impact.com]',
-  amazon:'Include 2-3 Amazon Associates product recommendations relevant to the topic. Format: [AMAZON: Product Name — $Price]',
-  none:'No affiliate links needed in this article.'
+  gear:'Include 2 natural affiliate link placeholders. Format exactly: [AFFILIATE: Product Name — $Price — Brand — via Impact.com]',
+  cards:'Include 2 collectibles affiliate placeholders. Format exactly: [AFFILIATE: Product Name — $Price — Brand — via Impact.com]',
+  amazon:'Include 2 Amazon product recommendations. Format exactly: [AMAZON: Product Name — $Price]',
+  none:'No affiliate links needed.'
 };
 
 var AUD_MAP = {
-  global:'global football fans — use "football" primarily, occasionally mention "soccer" for US readers',
-  us:'US audience — use "soccer" and "cleats" terminology, reference MLS and USMNT context',
-  uk:'UK audience — use "football" exclusively, reference Premier League and Three Lions context',
-  collectors:'sports card collectors — use hobby terms like box breaks, parallels, PSA grading, pull rates'
+  global:'global football fans — use football primarily, mention soccer for US readers occasionally',
+  us:'US audience — use soccer and cleats, reference MLS and USMNT',
+  uk:'UK audience — use football exclusively, reference Premier League',
+  collectors:'sports card collectors — use hobby terms like box breaks, parallels, PSA grading'
 };
 
-// Init
 document.addEventListener('DOMContentLoaded', function() {
   var kickoff = new Date('2026-06-11T17:00:00Z');
   var days = Math.max(0, Math.ceil((kickoff - Date.now()) / 86400000));
@@ -405,40 +395,34 @@ function checkProxy() {
   var proxyUrl = document.getElementById('proxy-url') ? document.getElementById('proxy-url').value : PROXY;
   PROXY = proxyUrl;
   dot.className = 'proxy-dot checking';
-  txt.textContent = 'Checking proxy server...';
-
+  txt.textContent = 'Checking proxy...';
   fetch(PROXY + '/', { method:'GET' })
     .then(function(r) { return r.json(); })
-    .then(function(data) {
+    .then(function(d) {
       dot.className = 'proxy-dot online';
-      txt.textContent = 'Proxy online — ' + (data.status || 'running');
+      txt.textContent = 'Proxy online — ' + (d.version || d.status || 'running');
       var r = document.getElementById('proxy-check-result');
-      if (r) r.innerHTML = '<div class="success">✅ Proxy is online and ready</div>';
+      if (r) r.innerHTML = '<div class="success">✅ Proxy v2.0 is online and ready</div>';
     })
     .catch(function() {
       dot.className = 'proxy-dot offline';
-      txt.textContent = 'Proxy offline — first request may take 50s to wake up (free tier)';
+      txt.textContent = 'Proxy sleeping — first request may take 50s to wake up';
       var r = document.getElementById('proxy-check-result');
-      if (r) r.innerHTML = '<div class="error">⚠️ Proxy is sleeping — click Generate and wait 50 seconds for it to wake up. This only happens after inactivity.</div>';
+      if (r) r.innerHTML = '<div class="error">⚠️ Proxy sleeping — click Generate and wait 50 seconds. This only happens after inactivity.</div>';
     });
 }
 
 function switchTab(tab) {
   var tabs = ['trends','generate','publish','settings'];
-  document.querySelectorAll('.tab').forEach(function(t, i) {
-    t.classList.toggle('active', tabs[i] === tab);
-  });
+  document.querySelectorAll('.tab').forEach(function(t, i) { t.classList.toggle('active', tabs[i] === tab); });
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
   document.getElementById('tab-' + tab).classList.add('active');
-  if (tab === 'generate') {
-    document.getElementById('gen-topic').textContent = state.topic || 'None selected';
-    updateReadTime();
-  }
+  if (tab === 'generate') { document.getElementById('gen-topic').textContent = state.topic || 'None selected'; updateReadTime(); }
 }
 
 function loadTrends() {
   var list = document.getElementById('trend-list');
-  list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading World Cup trending topics...</div>';
+  list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading trending topics...</div>';
   setTimeout(function() {
     list.innerHTML = '';
     TRENDS.forEach(function(t, i) {
@@ -447,15 +431,11 @@ function loadTrends() {
       d.id = 'tr-' + i;
       var bcls = t.badge === 'breakout' ? 'badge-breakout' : t.badge === 'hot' ? 'badge-hot' : 'badge-rising';
       var blbl = t.badge === 'breakout' ? 'Breakout' : t.badge === 'hot' ? 'Hot' : 'Rising';
-      d.innerHTML =
-        '<span class="trend-name">' + t.name + '</span>' +
-        '<span class="trend-vol">' + t.vol + '</span>' +
-        '<span class="badge ' + bcls + '">' + blbl + '</span>' +
-        '<span style="font-size:11px;color:#444">' + t.started + '</span>';
+      d.innerHTML = '<span class="trend-name">' + t.name + '</span><span class="trend-vol">' + t.vol + '</span><span class="badge ' + bcls + '">' + blbl + '</span><span style="font-size:11px;color:#444">' + t.started + '</span>';
       d.onclick = function() { selectTrend(t, i); };
       list.appendChild(d);
     });
-  }, 600);
+  }, 500);
 }
 
 function selectTrend(t, i) {
@@ -466,8 +446,7 @@ function selectTrend(t, i) {
   document.getElementById('selected-display').textContent = t.name + ' — ' + t.vol + ' · ' + t.pct;
   document.getElementById('selected-display').style.color = '#E8FF00';
   var btn = document.getElementById('btn-go-gen');
-  btn.disabled = false;
-  btn.style.opacity = '1';
+  btn.disabled = false; btn.style.opacity = '1';
   document.getElementById('gen-topic').textContent = t.name;
   updateReadTime();
 }
@@ -479,8 +458,7 @@ function useCustomKw() {
   document.getElementById('selected-display').textContent = kw + ' — custom keyword';
   document.getElementById('selected-display').style.color = '#E8FF00';
   var btn = document.getElementById('btn-go-gen');
-  btn.disabled = false;
-  btn.style.opacity = '1';
+  btn.disabled = false; btn.style.opacity = '1';
   document.getElementById('gen-topic').textContent = kw;
   updateReadTime();
   switchTab('generate');
@@ -507,42 +485,36 @@ function updateReadTime() {
 }
 
 async function generateArticle() {
-  if (!state.topic) {
-    alert('Please select a topic from the Trends tab first.');
-    switchTab('trends');
-    return;
-  }
-
+  if (!state.topic) { alert('Please select a topic first.'); switchTab('trends'); return; }
   var proxyUrl = document.getElementById('proxy-url') ? document.getElementById('proxy-url').value.trim() : PROXY;
   PROXY = proxyUrl;
 
-  var artType = document.getElementById('art-type').value;
+  var artType  = document.getElementById('art-type').value;
   var wordCount = document.getElementById('word-count').value;
-  var affType = document.getElementById('aff-type').value;
+  var affType  = document.getElementById('aff-type').value;
   var audience = document.getElementById('audience').value;
-  var tone = document.getElementById('tone') ? document.getElementById('tone').value : 'editorial';
-  var pubName = document.getElementById('pub-name') ? document.getElementById('pub-name').value : 'BestSportsMag';
-  var author = document.getElementById('pub-author') ? document.getElementById('pub-author').value : 'BSM Editorial Staff';
+  var tone     = document.getElementById('tone').value;
+  var pubName  = document.getElementById('pub-name').value || 'BestSportsMag';
+  var author   = document.getElementById('pub-author').value || 'BSM Editorial Staff';
 
-  var systemPrompt = 'You are an expert football journalist and SEO specialist writing for ' + pubName + ', a global sports magazine. Your articles must rank on Google and satisfy E-E-A-T guidelines. Be authoritative, fast-paced, and specific. Never use filler phrases. Target audience: ' + AUD_MAP[audience] + '. Tone: ' + tone + '.';
+  var systemPrompt = 'You are an expert football journalist and SEO specialist writing for ' + pubName + ', a global sports magazine. Follow Google E-E-A-T guidelines. Be authoritative, specific, and never use filler phrases. Target: ' + AUD_MAP[audience] + '. Tone: ' + tone + '.';
 
   var userPrompt = 'Write a complete ' + wordCount + '-word SEO article about: "' + state.topic + '"\n\n' +
     'OUTPUT FORMAT — use exactly this structure:\n\n' +
-    'TITLE: [SEO title under 60 characters, target keyword first, include a power word or number]\n\n' +
-    'SLUG: [URL slug, all lowercase, hyphens only, max 6 words, no dates]\n\n' +
-    'META: [Meta description exactly 150-155 characters, include keyword, state a benefit, soft CTA]\n\n' +
+    'TITLE: [SEO title under 60 characters, keyword first]\n\n' +
+    'SLUG: [URL slug, lowercase hyphens, max 6 words, no dates]\n\n' +
+    'META: [Meta description exactly 150-155 characters, keyword + benefit + soft CTA]\n\n' +
     'CONTENT:\n' +
-    '[Start immediately with a strong hook paragraph — no heading. Then 4-5 ## H2 sections. End with ## Frequently Asked Questions section containing exactly 3 Q&A pairs using **Q:** and **A:** format.]\n\n' +
-    'SEO REQUIREMENTS:\n' +
-    '- Target keyword in: first 100 words, 2+ H2 headings, naturally throughout body\n' +
-    '- Include real World Cup 2026 facts: June 11 – July 19 2026, hosts USA/Canada/Mexico, 48 teams, 104 matches, 16 venues\n' +
-    '- One H2 must be a question (for People Also Ask targeting)\n' +
-    '- Featured snippet optimization: answer key questions directly in the first sentence of each section\n' +
-    '- Internal links: use [INTERNAL: related topic suggestion] placeholder 2 times\n' +
+    '[Opening hook paragraph — no heading. Then 4-5 ## H2 sections. End with ## Frequently Asked Questions with exactly 3 Q&A pairs using **Q:** and **A:** format.]\n\n' +
+    'SEO RULES:\n' +
+    '- Keyword in: first 100 words, 2+ H2 headings, naturally throughout\n' +
+    '- One H2 must be a question for People Also Ask targeting\n' +
+    '- World Cup 2026 facts: June 11–July 19 2026, USA/Canada/Mexico hosts, 48 teams, 104 matches, 16 venues\n' +
+    '- Internal links: use [INTERNAL: related topic] placeholder exactly 2 times\n' +
     '- ' + AFF_MAP[affType] + '\n' +
     '- Article type: ' + TYPE_MAP[artType] + '\n' +
-    '- Strong conclusion paragraph with key takeaway\n' +
-    '- Author credit at end: By ' + author;
+    '- Strong conclusion paragraph\n' +
+    '- Credit: By ' + author;
 
   document.getElementById('gen-loading').style.display = 'block';
   document.getElementById('article-section').style.display = 'none';
@@ -552,53 +524,53 @@ async function generateArticle() {
     var resp = await fetch(PROXY + '/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system: systemPrompt,
-        prompt: userPrompt,
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000
-      })
+      body: JSON.stringify({ system: systemPrompt, prompt: userPrompt, model: 'claude-sonnet-4-20250514', max_tokens: 4000 })
     });
 
     var data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Proxy error ' + resp.status);
 
-    if (!resp.ok) {
-      throw new Error(data.error || 'Proxy error ' + resp.status);
+    // v2: proxy returns bsm object with pre-styled HTML
+    if (data.bsm) {
+      state.title      = data.bsm.title;
+      state.slug       = data.bsm.slug;
+      state.meta       = data.bsm.meta;
+      state.content    = data.bsm.raw;
+      state.styledHtml = data.bsm.html;
+    } else {
+      // Fallback for old proxy
+      var text = data.content[0].text;
+      var titleM = text.match(/TITLE:\s*(.+?)(?:\n|$)/);
+      var slugM  = text.match(/SLUG:\s*(.+?)(?:\n|$)/);
+      var metaM  = text.match(/META:\s*(.+?)(?:\n|$)/);
+      var contM  = text.match(/CONTENT:\s*([\s\S]+)/);
+      state.title   = titleM ? titleM[1].trim() : state.topic;
+      state.slug    = slugM  ? slugM[1].trim() : state.topic.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').slice(0,60);
+      state.meta    = metaM  ? metaM[1].trim() : '';
+      state.content = contM  ? contM[1].trim() : text;
+      state.styledHtml = '<p>' + state.content.replace(/\n\n/g,'</p><p>') + '</p>';
     }
-
-    var text = data.content[0].text;
-
-    var titleM = text.match(/TITLE:\s*(.+?)(?:\n|$)/);
-    var slugM  = text.match(/SLUG:\s*(.+?)(?:\n|$)/);
-    var metaM  = text.match(/META:\s*(.+?)(?:\n|$)/);
-    var contM  = text.match(/CONTENT:\s*([\s\S]+)/);
-
-    state.title   = titleM ? titleM[1].trim() : state.topic;
-    state.slug    = slugM  ? slugM[1].trim().replace(/[^a-z0-9-]/g,'') : state.topic.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').slice(0,60);
-    state.meta    = metaM  ? metaM[1].trim() : '';
-    state.content = contM  ? contM[1].trim() : text;
 
     document.getElementById('out-title').textContent   = state.title;
     document.getElementById('out-slug').textContent    = state.slug;
     document.getElementById('out-meta').textContent    = state.meta;
     document.getElementById('out-content').textContent = state.content;
+    document.getElementById('out-html').textContent    = state.styledHtml.substring(0, 800) + '...';
 
     state.genCount++;
     state.cost += 0.30;
-    document.getElementById('st-gen').textContent   = state.genCount;
+    document.getElementById('st-gen').textContent    = state.genCount;
     document.getElementById('st-needed').textContent = Math.max(0, 48 - state.genCount);
-    document.getElementById('sess-gen').textContent = state.genCount;
+    document.getElementById('sess-gen').textContent  = state.genCount;
     document.getElementById('sess-cost').textContent = '$' + state.cost.toFixed(2);
-
-    document.getElementById('chk-1').checked = true;
     document.getElementById('article-section').style.display = 'block';
     document.getElementById('btn-pub').disabled = false;
     document.getElementById('btn-pub').style.opacity = '1';
 
   } catch(e) {
     var msg = e.message || 'Unknown error';
-    if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-      alert('Proxy server is waking up (free tier sleeps after inactivity).\n\nWait 50 seconds and try again. This only happens on the first request after inactivity.');
+    if (msg.includes('fetch') || msg.includes('Network')) {
+      alert('Proxy server is waking up. Wait 50 seconds and try again.');
     } else {
       alert('Error: ' + msg);
     }
@@ -618,11 +590,9 @@ function copyField(id) {
   });
 }
 
-function copyAll() {
+function copyRaw() {
   var full = 'TITLE: ' + state.title + '\n\nSLUG: ' + state.slug + '\n\nMETA: ' + state.meta + '\n\nCONTENT:\n\n' + state.content;
-  navigator.clipboard.writeText(full).then(function() {
-    alert('Full article copied to clipboard. Paste into WordPress editor.');
-  });
+  navigator.clipboard.writeText(full).then(function() { alert('Raw article copied to clipboard.'); });
 }
 
 async function testWP() {
@@ -631,73 +601,53 @@ async function testWP() {
   var pass = document.getElementById('wp-pass').value.trim();
   if (!url || !user || !pass) { alert('Fill in all WordPress fields.'); return; }
   var status = document.getElementById('wp-status');
-  status.innerHTML = '<div class="loading"><div class="spinner"></div>Testing connection...</div>';
+  status.innerHTML = '<div class="loading"><div class="spinner"></div>Testing...</div>';
   try {
-    var r = await fetch(url + '/wp-json/wp/v2/users/me', {
-      headers: { 'Authorization': 'Basic ' + btoa(user + ':' + pass) }
-    });
+    var r = await fetch(url + '/wp-json/wp/v2/users/me', { headers: { 'Authorization': 'Basic ' + btoa(user + ':' + pass) } });
     if (r.ok) {
       var d = await r.json();
       status.innerHTML = '<div class="success">✅ Connected as: <strong>' + d.name + '</strong></div>';
       document.getElementById('btn-pub').disabled = false;
       document.getElementById('btn-pub').style.opacity = '1';
     } else {
-      status.innerHTML = '<div class="error">❌ Failed (' + r.status + ') — check username and Application Password</div>';
+      status.innerHTML = '<div class="error">❌ Failed (' + r.status + ') — check credentials</div>';
     }
   } catch(e) {
-    status.innerHTML = '<div class="error">❌ Cannot reach ' + url + ' — check your WordPress URL</div>';
+    status.innerHTML = '<div class="error">❌ Cannot reach WordPress — check URL</div>';
   }
 }
 
 async function publishWP() {
-  if (!state.content) { alert('Generate an article first.'); switchTab('generate'); return; }
+  if (!state.styledHtml) { alert('Generate an article first.'); switchTab('generate'); return; }
   var url  = document.getElementById('wp-url').value.trim().replace(/\/$/,'');
   var user = document.getElementById('wp-user').value.trim();
   var pass = document.getElementById('wp-pass').value.trim();
   var cat  = parseInt(document.getElementById('wp-cat').value) || null;
-  if (!url || !user || !pass) { alert('Fill in all WordPress fields.'); return; }
+  if (!url || !user || !pass) { alert('Fill in WordPress credentials.'); return; }
 
   var status = document.getElementById('wp-status');
-  status.innerHTML = '<div class="loading"><div class="spinner"></div>Publishing to WordPress...</div>';
+  status.innerHTML = '<div class="loading"><div class="spinner"></div>Publishing BSM-styled article...</div>';
   document.getElementById('btn-pub').disabled = true;
 
-  var html = state.content
-    .replace(/## (.+)/g, '<h2>$1</h2>')
-    .replace(/\*\*Q:\*\* (.+)/g, '<strong>Q: $1</strong>')
-    .replace(/\*\*A:\*\* (.+)/g, '<p>$1</p>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^/, '<p>').replace(/$/, '</p>');
-
   try {
-    var body = {
-      title: state.title,
-      content: html,
-      slug: state.slug,
-      excerpt: state.meta,
-      status: 'publish'
-    };
+    var body = { title: state.title, content: state.styledHtml, slug: state.slug, excerpt: state.meta, status: 'publish' };
     if (cat) body.categories = [cat];
 
     var r = await fetch(url + '/wp-json/wp/v2/posts', {
       method: 'POST',
-      headers: {
-        'Authorization': 'Basic ' + btoa(user + ':' + pass),
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Authorization': 'Basic ' + btoa(user + ':' + pass), 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
 
     if (r.ok) {
       var d = await r.json();
       state.pubCount++;
-      document.getElementById('st-pub').textContent   = state.pubCount;
-      document.getElementById('sess-pub').textContent = state.pubCount;
-      document.getElementById('chk-2').checked = true;
-      status.innerHTML = '<div class="success">✅ Published! <a href="' + d.link + '" target="_blank">View post →</a><br><small style="color:#00aa00">Remember: set a featured image in WordPress for the Posts module to display it on your homepage.</small></div>';
+      document.getElementById('st-pub').textContent    = state.pubCount;
+      document.getElementById('sess-pub').textContent  = state.pubCount;
+      status.innerHTML = '<div class="success">✅ Published with BSM styling! <a href="' + d.link + '" target="_blank">View post →</a><br><small style="color:#00aa00">Set featured image in WordPress to complete the article.</small></div>';
     } else {
       var err = await r.json();
-      status.innerHTML = '<div class="error">❌ ' + (err.message || 'Publish failed — error ' + r.status) + '</div>';
+      status.innerHTML = '<div class="error">❌ ' + (err.message || 'Error ' + r.status) + '</div>';
     }
   } catch(e) {
     status.innerHTML = '<div class="error">❌ ' + e.message + '</div>';
@@ -708,7 +658,7 @@ async function publishWP() {
 }
 
 function resetSession() {
-  state = { topic:null, title:'', slug:'', meta:'', content:'', genCount:0, pubCount:0, cost:0 };
+  state = { topic:null, title:'', slug:'', meta:'', content:'', styledHtml:'', genCount:0, pubCount:0, cost:0 };
   document.getElementById('st-gen').textContent = '0';
   document.getElementById('st-pub').textContent = '0';
   document.getElementById('st-needed').textContent = '48';
