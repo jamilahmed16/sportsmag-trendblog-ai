@@ -76,8 +76,8 @@ a{color:#E8FF00;text-decoration:none}
 <body>
 <div class="wrap">
 
-<h1>TrendBlog AI — World Cup 2026 <span class="version-badge">v2.0 — BSM Styled Output</span></h1>
-<p class="sub">Generates BSM-branded HTML automatically → publishes directly to WordPress with your site's style guide applied</p>
+<h1>TrendBlog AI — World Cup 2026 <span class="version-badge">v4.1 — Live Trends + Fact-Checked</span></h1>
+<p class="sub">Pulls LIVE trending topics from Google Trends · Searches current news for facts · Publishes BSM-styled HTML to WordPress</p>
 
 <div class="proxy-status">
   <div class="proxy-dot checking" id="proxy-dot"></div>
@@ -186,7 +186,7 @@ a{color:#E8FF00;text-decoration:none}
       </div>
     </div>
     <div class="info" style="margin-bottom:12px">
-      ✅ <strong>v2.0:</strong> Articles are now automatically converted to BSM-styled HTML before publishing. H2 headings get your lime accent border. Affiliate placeholders become styled inline links. FAQ sections get schema markup. No manual formatting needed.
+      ✅ <strong>v4.1:</strong> <strong>Live Google Trends</strong> in Trends tab. <strong>Brave Search + SerpAPI</strong> fetch current news before Claude writes. Articles are fact-checked against today's sources — not training data.
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-gen" onclick="generateArticle()">✍️ Generate BSM-styled article</button>
@@ -422,20 +422,63 @@ function switchTab(tab) {
 
 function loadTrends() {
   var list = document.getElementById('trend-list');
-  list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading trending topics...</div>';
-  setTimeout(function() {
-    list.innerHTML = '';
-    TRENDS.forEach(function(t, i) {
-      var d = document.createElement('div');
-      d.className = 'trend-item';
-      d.id = 'tr-' + i;
-      var bcls = t.badge === 'breakout' ? 'badge-breakout' : t.badge === 'hot' ? 'badge-hot' : 'badge-rising';
-      var blbl = t.badge === 'breakout' ? 'Breakout' : t.badge === 'hot' ? 'Hot' : 'Rising';
-      d.innerHTML = '<span class="trend-name">' + t.name + '</span><span class="trend-vol">' + t.vol + '</span><span class="badge ' + bcls + '">' + blbl + '</span><span style="font-size:11px;color:#444">' + t.started + '</span>';
-      d.onclick = function() { selectTrend(t, i); };
-      list.appendChild(d);
+  var label = document.getElementById('trends-source-label');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div>Fetching live trends from Google...</div>';
+  if (label) label.textContent = 'Fetching live trends from Google Trends...';
+
+  fetch(PROXY + '/trends')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var trends = data.trends || [];
+      if (label) {
+        label.textContent = data.source === 'fallback'
+          ? 'WORLD CUP 2026 — Curated Topics (Google Trends unavailable)'
+          : 'LIVE FROM GOOGLE TRENDS — ' + data.source + ' · Updated just now';
+      }
+      list.innerHTML = '';
+      trends.forEach(function(t, i) {
+        var d = document.createElement('div');
+        d.className = 'trend-item';
+        d.id = 'tr-' + i;
+        var bcls = t.badge === 'breakout' ? 'badge-breakout' : t.badge === 'hot' ? 'badge-hot' : 'badge-rising';
+        var blbl = t.badge === 'breakout' ? '🔥 Breakout' : t.badge === 'hot' ? '⚡ Hot' : '📈 Rising';
+        d.innerHTML = '<span class="trend-name">' + t.name + '</span><span class="trend-vol">' + t.vol + '</span><span class="badge ' + bcls + '">' + blbl + '</span><span style="font-size:11px;color:#444">' + t.started + '</span>';
+        d.onclick = function() { selectTrend(t, i); };
+        list.appendChild(d);
+      });
+      if (!trends.length) list.innerHTML = '<div style="color:#555;padding:12px;">No trends returned — try refreshing.</div>';
+    })
+    .catch(function() {
+      if (label) label.textContent = 'WORLD CUP 2026 — Curated Topics (proxy offline)';
+      list.innerHTML = '';
+      getFallbackTrends().forEach(function(t, i) {
+        var d = document.createElement('div');
+        d.className = 'trend-item';
+        d.id = 'tr-' + i;
+        var bcls = t.badge === 'breakout' ? 'badge-breakout' : t.badge === 'hot' ? 'badge-hot' : 'badge-rising';
+        var blbl = t.badge === 'breakout' ? 'Breakout' : t.badge === 'hot' ? 'Hot' : 'Rising';
+        d.innerHTML = '<span class="trend-name">' + t.name + '</span><span class="trend-vol">' + t.vol + '</span><span class="badge ' + bcls + '">' + blbl + '</span><span style="font-size:11px;color:#444">' + t.started + '</span>';
+        d.onclick = function() { selectTrend(t, i); };
+        list.appendChild(d);
+      });
     });
-  }, 500);
+}
+
+function getFallbackTrends() {
+  return [
+    { name:'FIFA World Cup 2026 host cities guide',    vol:'500K+', badge:'breakout', pct:'+1,000%', started:'2h ago' },
+    { name:'World Cup 2026 group stage draw results',  vol:'200K+', badge:'breakout', pct:'+1,000%', started:'4h ago' },
+    { name:'Messi World Cup 2026 Argentina squad',     vol:'200K+', badge:'breakout', pct:'+1,000%', started:'3h ago' },
+    { name:'World Cup 2026 schedule fixtures dates',   vol:'200K+', badge:'hot',      pct:'+800%',   started:'6h ago' },
+    { name:'USA World Cup 2026 squad roster',          vol:'100K+', badge:'hot',      pct:'+650%',   started:'5h ago' },
+    { name:'World Cup 2026 tickets how to buy',        vol:'100K+', badge:'hot',      pct:'+500%',   started:'11h ago' },
+    { name:'England World Cup 2026 squad news',        vol:'100K+', badge:'hot',      pct:'+450%',   started:'8h ago' },
+    { name:'Brazil World Cup 2026 lineup prediction',  vol:'100K+', badge:'hot',      pct:'+600%',   started:'7h ago' },
+    { name:'France World Cup 2026 team preview',       vol:'100K+', badge:'rising',   pct:'+400%',   started:'9h ago' },
+    { name:'World Cup 2026 bracket predictions',       vol:'50K+',  badge:'rising',   pct:'+400%',   started:'13h ago' },
+    { name:'World Cup 2026 best football boots',       vol:'50K+',  badge:'rising',   pct:'+300%',   started:'16h ago' },
+    { name:'Topps Chrome World Cup 2026 cards',        vol:'50K+',  badge:'rising',   pct:'+500%',   started:'14h ago' }
+  ];
 }
 
 function selectTrend(t, i) {
