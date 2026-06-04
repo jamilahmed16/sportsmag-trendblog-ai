@@ -106,6 +106,7 @@ a{color:#E8FF00;text-decoration:none}
     <div id="trend-list"></div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="loadTrends()">Refresh</button>
+      <div id="trends-warn" style="display:none;background:#220000;border:1px solid #660000;color:#ff9999;font-size:11px;padding:8px 12px;border-radius:4px;margin-top:8px;font-family:monospace"></div>
       <button class="btn btn-ghost" onclick="showSerpPanel()" id="btn-serp" style="display:none">SERP Analysis</button>
     </div>
   </div>
@@ -191,9 +192,23 @@ a{color:#E8FF00;text-decoration:none}
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-gen" onclick="generateArticle()">Generate BSM-styled article</button>
+      <button class="btn btn-ghost" onclick="runSerpAnalysis()" style="margin-left:8px">SERP Analysis</button>
     </div>
     <div id="gen-loading" style="display:none">
       <div class="loading"><div class="spinner"></div>Claude is writing and styling your article — 20–40 seconds...</div>
+    </div>
+  </div>
+
+  <div id="serp-card" style="display:none;margin-top:12px">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="card-label">SERP Analysis</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="serp-kw-label" style="font-size:11px;color:#E8FF00;font-family:monospace"></span>
+          <button onclick="document.getElementById('serp-card').style.display='none'" style="background:none;border:1px solid #333;color:#555;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:3px">Close</button>
+        </div>
+      </div>
+      <div id="serp-results" style="font-size:12px;color:#888">Loading...</div>
     </div>
   </div>
 
@@ -235,7 +250,7 @@ a{color:#E8FF00;text-decoration:none}
       <div id="serp-panel" style="display:none;margin-top:14px;background:#0a0a0a;border:1px solid #222;padding:14px;border-radius:6px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <span style="font-size:10px;color:#E8FF00;font-weight:700;text-transform:uppercase;letter-spacing:.1em">SERP Analysis</span>
-          <button onclick="document.getElementById('serp-panel').style.display='none'" style="background:none;border:none;color:#555;cursor:pointer;font-size:16px">x</button>
+          <button onclick="document.getElementById('serp-card').style.display='none'" style="background:none;border:none;color:#555;cursor:pointer;font-size:16px">x</button>
         </div>
         <div id="serp-results" style="font-size:12px;color:#888">Click SERP Analysis to load data...</div>
       </div>
@@ -445,8 +460,14 @@ function loadTrends() {
       var trends = data.trends || [];
       if (label) {
         label.textContent = data.source === 'fallback'
-          ? 'WORLD CUP 2026 — Curated Topics (Google Trends unavailable)'
-          : 'LIVE FROM GOOGLE TRENDS — ' + data.source + ' · Updated just now';
+          ? 'STATIC FALLBACK — SerpAPI trends unavailable' + (data.lastError ? ' (' + data.lastError + ')' : '')
+          : 'LIVE — ' + data.source + ' — ' + new Date().toLocaleTimeString();
+      }
+      // Show warning banner if using fallback
+      var warn = document.getElementById('trends-warn');
+      if (warn) {
+        warn.style.display = data.source === 'fallback' ? 'block' : 'none';
+        if (data.lastError) warn.textContent = 'Live trends unavailable: ' + data.lastError + ' — showing curated World Cup topics';
       }
       list.innerHTML = '';
       trends.forEach(function(t, i) {
@@ -741,12 +762,14 @@ function rebuildHtml() {
 
 // ── SERP Analysis ──
 async function runSerpAnalysis() {
-  var keyword = state.topic || document.getElementById('out-title') && document.getElementById('out-title').value;
-  if (!keyword) { alert('No topic selected. Generate an article first.'); return; }
-  var panel   = document.getElementById('serp-panel');
+  var keyword = state.topic || (document.getElementById('out-title') && document.getElementById('out-title').value) || '';
+  if (!keyword) { alert('Select a topic from the Trends tab first.'); return; }
+  var card    = document.getElementById('serp-card');
   var results = document.getElementById('serp-results');
-  panel.style.display = 'block';
-  results.innerHTML = '<div class="loading"><div class="spinner"></div>Fetching SERP data for: ' + keyword + '</div>';
+  var kwLabel = document.getElementById('serp-kw-label');
+  card.style.display = 'block';
+  if (kwLabel) kwLabel.textContent = keyword;
+  results.innerHTML = '<div class="loading"><div class="spinner"></div>Analysing SERP for: ' + keyword + ' ...</div>';
 
   try {
     var r = await fetch(PROXY + '/serp', {
