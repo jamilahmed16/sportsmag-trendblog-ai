@@ -93,10 +93,10 @@ a{color:#E8FF00;text-decoration:none}
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('trends')">Trends</button>
-  <button class="tab" onclick="switchTab('generate')">Generate</button>
-  <button class="tab" onclick="switchTab('publish')">Publish</button>
-  <button class="tab" onclick="switchTab('settings')">Settings</button>
+  <button class="tab active" onclick="switchTab('trends')">📈 Trends</button>
+  <button class="tab" onclick="switchTab('generate')">✍️ Generate</button>
+  <button class="tab" onclick="switchTab('publish')">🚀 Publish</button>
+  <button class="tab" onclick="switchTab('settings')">⚙️ Settings</button>
 </div>
 
 <!-- TRENDS -->
@@ -105,9 +105,7 @@ a{color:#E8FF00;text-decoration:none}
     <div class="card-label">World Cup 2026 — Trending Now · US Sports · Active Only</div>
     <div id="trend-list"></div>
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick="loadTrends()">Refresh</button>
-      <div id="trends-warn" style="display:none;background:#220000;border:1px solid #660000;color:#ff9999;font-size:11px;padding:8px 12px;border-radius:4px;margin-top:8px;font-family:monospace"></div>
-      <button class="btn btn-ghost" onclick="showSerpPanel()" id="btn-serp" style="display:none">SERP Analysis</button>
+      <button class="btn btn-ghost" onclick="loadTrends()">🔄 Refresh</button>
     </div>
   </div>
   <div class="card">
@@ -188,27 +186,13 @@ a{color:#E8FF00;text-decoration:none}
       </div>
     </div>
     <div class="info" style="margin-bottom:12px">
-       <strong>v4.1:</strong> <strong>Live Google Trends</strong> in Trends tab. <strong>Brave Search + SerpAPI</strong> fetch current news before Claude writes. Articles are fact-checked against today's sources — not training data.
+      ✅ <strong>v4.1:</strong> <strong>Live Google Trends</strong> in Trends tab. <strong>Brave Search + SerpAPI</strong> fetch current news before Claude writes. Articles are fact-checked against today's sources — not training data.
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" id="btn-gen" onclick="generateArticle()">Generate BSM-styled article</button>
-      <button class="btn btn-ghost" onclick="runSerpAnalysis()" style="margin-left:8px">SERP Analysis</button>
+      <button class="btn btn-primary" id="btn-gen" onclick="generateArticle()">✍️ Generate BSM-styled article</button>
     </div>
     <div id="gen-loading" style="display:none">
       <div class="loading"><div class="spinner"></div>Claude is writing and styling your article — 20–40 seconds...</div>
-    </div>
-  </div>
-
-  <div id="serp-card" style="display:none;margin-top:12px">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div class="card-label">SERP Analysis</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <span id="serp-kw-label" style="font-size:11px;color:#E8FF00;font-family:monospace"></span>
-          <button onclick="document.getElementById('serp-card').style.display='none'" style="background:none;border:1px solid #333;color:#555;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:3px">Close</button>
-        </div>
-      </div>
-      <div id="serp-results" style="font-size:12px;color:#888">Loading...</div>
     </div>
   </div>
 
@@ -223,36 +207,24 @@ a{color:#E8FF00;text-decoration:none}
         </div>
       </div>
 
-      <!-- EDITABLE FIELDS -->
-      <div class="output-label">SEO Title <span style="color:#555;font-size:10px">— click to edit</span></div>
-      <input type="text" id="out-title" style="background:#0d0d0d;border:1px solid #333;color:#E8FF00;font-size:15px;font-weight:700;padding:10px 12px;width:100%;outline:none;font-family:inherit;margin-bottom:10px" oninput="state.title=this.value">
+      <div class="output-label">SEO Title</div>
+      <div class="output-val" id="out-title" onclick="copyField('out-title')"></div>
 
-      <div class="output-label">URL Slug <span style="color:#555;font-size:10px">— click to edit</span></div>
-      <input type="text" id="out-slug" style="background:#0d0d0d;border:1px solid #333;color:#00b4ff;font-size:13px;font-family:monospace;padding:8px 12px;width:100%;outline:none;margin-bottom:10px" oninput="state.slug=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-')">
+      <div class="output-label" style="margin-top:10px">URL Slug</div>
+      <div class="output-val output-slug" id="out-slug" onclick="copyField('out-slug')"></div>
 
-      <div class="output-label">Meta Description <span style="color:#555;font-size:10px">— click to edit (150-155 chars)</span></div>
-      <textarea id="out-meta" rows="2" style="background:#0d0d0d;border:1px solid #333;color:#aaaaaa;font-size:13px;padding:8px 12px;width:100%;outline:none;font-family:inherit;resize:vertical;margin-bottom:10px" oninput="state.meta=this.value"></textarea>
+      <div class="output-label" style="margin-top:10px">Meta Description</div>
+      <div class="output-val" id="out-meta" onclick="copyField('out-meta')" style="font-size:13px;color:#aaa"></div>
 
-      <div class="output-label">Article Body <span style="color:#555;font-size:10px">— edit before publishing</span></div>
-      <textarea id="out-content" rows="18" style="background:#0a0a0a;border:1px solid #222;color:#c8c8c8;font-size:12px;padding:12px;width:100%;outline:none;font-family:monospace;resize:vertical;line-height:1.7;margin-bottom:10px" oninput="state.content=this.value;rebuildHtml()"></textarea>
+      <div class="output-label" style="margin-top:14px">BSM Styled HTML Preview <span style="color:#555;font-size:11px">(what gets published to WordPress)</span></div>
+      <div class="html-preview" id="out-html"></div>
 
-      <div class="output-label" style="margin-top:4px">HTML Preview <span style="color:#555;font-size:10px">(auto-updates as you edit)</span></div>
-      <div class="html-preview" id="out-html" style="margin-bottom:14px"></div>
+      <div class="output-label" style="margin-top:14px">Raw article text</div>
+      <div class="output-box" id="out-content"></div>
 
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="switchTab('publish')">Publish to WordPress</button>
-        <button class="btn btn-ghost" onclick="runSerpAnalysis()" id="btn-serp-gen">SERP Analysis</button>
-        <button class="btn btn-ghost" onclick="generateArticle()">Regenerate</button>
-        <button class="btn btn-ghost" onclick="copyRaw()">Copy HTML</button>
-      </div>
-
-      <!-- SERP PANEL — shown inline below buttons -->
-      <div id="serp-panel" style="display:none;margin-top:14px;background:#0a0a0a;border:1px solid #222;padding:14px;border-radius:6px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <span style="font-size:10px;color:#E8FF00;font-weight:700;text-transform:uppercase;letter-spacing:.1em">SERP Analysis</span>
-          <button onclick="document.getElementById('serp-card').style.display='none'" style="background:none;border:none;color:#555;cursor:pointer;font-size:16px">x</button>
-        </div>
-        <div id="serp-results" style="font-size:12px;color:#888">Click SERP Analysis to load data...</div>
+        <button class="btn btn-primary" onclick="switchTab('publish')">Publish to WordPress →</button>
+        <button class="btn btn-ghost" onclick="generateArticle()">🔄 Regenerate</button>
       </div>
     </div>
   </div>
@@ -279,8 +251,8 @@ a{color:#E8FF00;text-decoration:none}
       <input type="text" id="wp-cat" placeholder="e.g. 5">
     </div>
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick="testWP()"> Test connection</button>
-      <button class="btn btn-primary" id="btn-pub" onclick="publishWP()" disabled style="opacity:.4">Publish with BSM styling</button>
+      <button class="btn btn-ghost" onclick="testWP()">🔌 Test connection</button>
+      <button class="btn btn-primary" id="btn-pub" onclick="publishWP()" disabled style="opacity:.4">🚀 Publish with BSM styling</button>
     </div>
     <div id="wp-status"></div>
   </div>
@@ -288,12 +260,12 @@ a{color:#E8FF00;text-decoration:none}
   <div class="card">
     <div class="card-label">What gets published</div>
     <div style="font-size:13px;color:#aaa;line-height:1.8">
-       BSM-styled HTML with <code style="color:#E8FF00">.bsm-post-h2</code> classes on headings<br>
-       Lime accent border on all H2 sections (via your CSS)<br>
-       Affiliate placeholders converted to styled inline links<br>
-       FAQ section with Schema.org markup for rich results<br>
-       Proper paragraph and list formatting<br>
-       Internal link placeholders styled as BSM links
+      ✅ BSM-styled HTML with <code style="color:#E8FF00">.bsm-post-h2</code> classes on headings<br>
+      ✅ Lime accent border on all H2 sections (via your CSS)<br>
+      ✅ Affiliate placeholders converted to styled inline links<br>
+      ✅ FAQ section with Schema.org markup for rich results<br>
+      ✅ Proper paragraph and list formatting<br>
+      ✅ Internal link placeholders styled as BSM links
     </div>
   </div>
 
@@ -348,7 +320,7 @@ a{color:#E8FF00;text-decoration:none}
       <div>Articles published: <strong style="color:#e8e8e8" id="sess-pub">0</strong></div>
       <div>Estimated API cost: <strong style="color:#e8e8e8" id="sess-cost">$0.00</strong></div>
     </div>
-    <button class="btn btn-ghost" onclick="resetSession()"> Reset session</button>
+    <button class="btn btn-ghost" onclick="resetSession()">🗑 Reset session</button>
   </div>
 </div>
 
@@ -430,13 +402,13 @@ function checkProxy() {
       dot.className = 'proxy-dot online';
       txt.textContent = 'Proxy online — ' + (d.version || d.status || 'running');
       var r = document.getElementById('proxy-check-result');
-      if (r) r.innerHTML = '<div class="success"> Proxy v2.0 is online and ready</div>';
+      if (r) r.innerHTML = '<div class="success">✅ Proxy v2.0 is online and ready</div>';
     })
     .catch(function() {
       dot.className = 'proxy-dot offline';
       txt.textContent = 'Proxy sleeping — first request may take 50s to wake up';
       var r = document.getElementById('proxy-check-result');
-      if (r) r.innerHTML = '<div class="error">️ Proxy sleeping — click Generate and wait 50 seconds. This only happens after inactivity.</div>';
+      if (r) r.innerHTML = '<div class="error">⚠️ Proxy sleeping — click Generate and wait 50 seconds. This only happens after inactivity.</div>';
     });
 }
 
@@ -460,14 +432,8 @@ function loadTrends() {
       var trends = data.trends || [];
       if (label) {
         label.textContent = data.source === 'fallback'
-          ? 'STATIC FALLBACK — SerpAPI trends unavailable' + (data.lastError ? ' (' + data.lastError + ')' : '')
-          : 'LIVE — ' + data.source + ' — ' + new Date().toLocaleTimeString();
-      }
-      // Show warning banner if using fallback
-      var warn = document.getElementById('trends-warn');
-      if (warn) {
-        warn.style.display = data.source === 'fallback' ? 'block' : 'none';
-        if (data.lastError) warn.textContent = 'Live trends unavailable: ' + data.lastError + ' — showing curated World Cup topics';
+          ? 'WORLD CUP 2026 — Curated Topics (Google Trends unavailable)'
+          : 'LIVE FROM GOOGLE TRENDS — ' + data.source + ' · Updated just now';
       }
       list.innerHTML = '';
       trends.forEach(function(t, i) {
@@ -475,7 +441,7 @@ function loadTrends() {
         d.className = 'trend-item';
         d.id = 'tr-' + i;
         var bcls = t.badge === 'breakout' ? 'badge-breakout' : t.badge === 'hot' ? 'badge-hot' : 'badge-rising';
-        var blbl = t.badge === 'breakout' ? ' Breakout' : t.badge === 'hot' ? ' Hot' : ' Rising';
+        var blbl = t.badge === 'breakout' ? '🔥 Breakout' : t.badge === 'hot' ? '⚡ Hot' : '📈 Rising';
         d.innerHTML = '<span class="trend-name">' + t.name + '</span><span class="trend-vol">' + t.vol + '</span><span class="badge ' + bcls + '">' + blbl + '</span><span style="font-size:11px;color:#444">' + t.started + '</span>';
         d.onclick = function() { selectTrend(t, i); };
         list.appendChild(d);
@@ -628,9 +594,9 @@ async function generateArticle() {
       state.styledHtml = '<p>' + state.content.replace(/\n\n/g,'</p><p>') + '</p>';
     }
 
-    document.getElementById('out-title').value = state.title;
-    document.getElementById('out-slug').value = state.slug;
-    document.getElementById('out-meta').value = state.meta;
+    document.getElementById('out-title').textContent   = state.title;
+    document.getElementById('out-slug').textContent    = state.slug;
+    document.getElementById('out-meta').textContent    = state.meta;
     document.getElementById('out-content').textContent = state.content;
     document.getElementById('out-html').textContent    = state.styledHtml.substring(0, 800) + '...';
 
@@ -641,7 +607,6 @@ async function generateArticle() {
     document.getElementById('sess-gen').textContent  = state.genCount;
     document.getElementById('sess-cost').textContent = '$' + state.cost.toFixed(2);
     document.getElementById('article-section').style.display = 'block';
-    document.getElementById('btn-serp').style.display = 'inline-flex';
     document.getElementById('btn-pub').disabled = false;
     document.getElementById('btn-pub').style.opacity = '1';
 
@@ -684,14 +649,14 @@ async function testWP() {
     var r = await fetch(url + '/wp-json/wp/v2/users/me', { headers: { 'Authorization': 'Basic ' + btoa(user + ':' + pass) } });
     if (r.ok) {
       var d = await r.json();
-      status.innerHTML = '<div class="success"> Connected as: <strong>' + d.name + '</strong></div>';
+      status.innerHTML = '<div class="success">✅ Connected as: <strong>' + d.name + '</strong></div>';
       document.getElementById('btn-pub').disabled = false;
       document.getElementById('btn-pub').style.opacity = '1';
     } else {
-      status.innerHTML = '<div class="error">ERR Failed (' + r.status + ') — check credentials</div>';
+      status.innerHTML = '<div class="error">❌ Failed (' + r.status + ') — check credentials</div>';
     }
   } catch(e) {
-    status.innerHTML = '<div class="error">ERR Cannot reach WordPress — check URL</div>';
+    status.innerHTML = '<div class="error">❌ Cannot reach WordPress — check URL</div>';
   }
 }
 
@@ -722,13 +687,13 @@ async function publishWP() {
       state.pubCount++;
       document.getElementById('st-pub').textContent    = state.pubCount;
       document.getElementById('sess-pub').textContent  = state.pubCount;
-      status.innerHTML = '<div class="success"> Published with BSM styling! <a href="' + d.link + '" target="_blank">View post →</a><br><small style="color:#00aa00">Set featured image in WordPress to complete the article.</small></div>';
+      status.innerHTML = '<div class="success">✅ Published with BSM styling! <a href="' + d.link + '" target="_blank">View post →</a><br><small style="color:#00aa00">Set featured image in WordPress to complete the article.</small></div>';
     } else {
       var err = await r.json();
-      status.innerHTML = '<div class="error">ERR ' + (err.message || 'Error ' + r.status) + '</div>';
+      status.innerHTML = '<div class="error">❌ ' + (err.message || 'Error ' + r.status) + '</div>';
     }
   } catch(e) {
-    status.innerHTML = '<div class="error">ERR ' + e.message + '</div>';
+    status.innerHTML = '<div class="error">❌ ' + e.message + '</div>';
   } finally {
     document.getElementById('btn-pub').disabled = false;
     document.getElementById('btn-pub').style.opacity = '1';
@@ -745,82 +710,6 @@ function resetSession() {
   document.getElementById('sess-cost').textContent = '$0.00';
   document.getElementById('article-section').style.display = 'none';
 }
-
-// ── Rebuild HTML preview when user edits body ──
-function rebuildHtml() {
-  // Re-parse content and rebuild BSM HTML on the fly
-  var content = state.content || '';
-  var preview = content
-    .replace(/## (.+)/g, '<h2 style="font-family:sans-serif;font-size:22px;font-weight:800;color:#FFFFFF;margin:24px 0 10px;text-transform:uppercase">$1</h2>')
-    .replace(/### (.+)/g, '<h3 style="font-family:sans-serif;font-size:17px;font-weight:700;color:#e8e8e8;margin:16px 0 8px">$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#FFFFFF">$1</strong>')
-    .replace(/\n\n/g, '</p><p style="font-size:16px;line-height:1.8;color:#C8C8C8;margin:0 0 16px">')
-    .replace(/\n/g, '<br>');
-  document.getElementById('out-html').innerHTML = '<p style="font-size:16px;line-height:1.8;color:#C8C8C8;margin:0 0 16px">' + preview + '</p>';
-  state.styledHtml = document.getElementById('out-html').innerHTML;
-}
-
-// ── SERP Analysis ──
-async function runSerpAnalysis() {
-  var keyword = state.topic || (document.getElementById('out-title') && document.getElementById('out-title').value) || '';
-  if (!keyword) { alert('Select a topic from the Trends tab first.'); return; }
-  var card    = document.getElementById('serp-card');
-  var results = document.getElementById('serp-results');
-  var kwLabel = document.getElementById('serp-kw-label');
-  card.style.display = 'block';
-  if (kwLabel) kwLabel.textContent = keyword;
-  results.innerHTML = '<div class="loading"><div class="spinner"></div>Analysing SERP for: ' + keyword + ' ...</div>';
-
-  try {
-    var r = await fetch(PROXY + '/serp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ keyword: keyword })
-    });
-    var d = await r.json();
-    if (d.error) { results.innerHTML = '<span style="color:#ff6b6b">Error: ' + d.error + '</span>'; return; }
-
-    var html = '<div style="font-size:10px;color:#555;margin-bottom:8px">Source: ' + d.source + ' &mdash; ' + d.total + ' results for: <strong style="color:#ccc">' + keyword + '</strong></div>';
-
-    if (d.paa && d.paa.length > 0) {
-      html += '<div style="font-size:10px;color:#E8FF00;font-weight:700;text-transform:uppercase;margin:10px 0 6px">People Also Ask</div>';
-      html += d.paa.map(function(p) {
-        return '<div style="padding:6px 0;border-bottom:1px solid #1a1a1a">'
-          + '<div style="color:#e8e8e8;font-weight:600;font-size:12px">' + p.q + '</div>'
-          + (p.a ? '<div style="color:#666;font-size:11px;margin-top:3px">' + p.a.slice(0,200) + '</div>' : '')
-          + '</div>';
-      }).join('');
-    }
-
-    if (d.results && d.results.length > 0) {
-      html += '<div style="font-size:10px;color:#E8FF00;font-weight:700;text-transform:uppercase;margin:12px 0 6px">Top Ranking Pages</div>';
-      html += d.results.slice(0,6).map(function(r, i) {
-        return '<div style="padding:8px 0;border-bottom:1px solid #1a1a1a">'
-          + '<div style="color:#e8e8e8;font-weight:600;font-size:12px">' + (i+1) + '. ' + r.title + '</div>'
-          + '<div style="color:#00b4ff;font-size:10px;font-family:monospace;margin:2px 0">' + r.url.slice(0,80) + '</div>'
-          + (r.description ? '<div style="color:#666;font-size:11px">' + r.description.slice(0,150) + '</div>' : '')
-          + '</div>';
-      }).join('');
-    }
-
-    if (d.related && d.related.length > 0) {
-      html += '<div style="font-size:10px;color:#E8FF00;font-weight:700;text-transform:uppercase;margin:12px 0 6px">Related Searches</div>';
-      html += '<div style="display:flex;flex-wrap:wrap;gap:6px">'
-        + d.related.map(function(s){ return '<span style="background:#1a1a1a;color:#888;font-size:10px;padding:3px 8px;border-radius:3px">' + s + '</span>'; }).join('')
-        + '</div>';
-    }
-
-    results.innerHTML = html;
-  } catch(e) {
-    results.innerHTML = '<span style="color:#ff6b6b">Failed: ' + e.message + '</span>';
-  }
-}
-
-function showSerpPanel() {
-  switchTab('generate');
-  runSerpAnalysis();
-}
-
 </script>
 </body>
 </html>
