@@ -3,713 +3,1191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TrendBlog AI v2 — World Cup 2026</title>
+<title>TrendBlog AI v5 — BestSportsMag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
+:root {
+  --black:   #0A0A0A;
+  --black-r: #111111;
+  --black-s: #1A1A1A;
+  --dg:      #2E2E2E;
+  --mg:      #555555;
+  --lg:      #C8C8C8;
+  --white:   #F5F5F5;
+  --lime:    #E8FF00;
+  --lime-d:  #C8DF00;
+  --blue:    #00B4FF;
+  --green:   #00CC66;
+  --red:     #FF4444;
+  --orange:  #FF9F1C;
+  --f-d:     'Barlow Condensed', sans-serif;
+  --f-b:     'Lora', serif;
+  --f-m:     'DM Mono', monospace;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#e8e8e8;font-size:15px;line-height:1.6}
-.wrap{max-width:960px;margin:0 auto;padding:24px 20px}
-h1{font-size:22px;font-weight:700;color:#E8FF00;margin-bottom:4px}
-.sub{font-size:13px;color:#666;margin-bottom:24px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
-.stat{background:#111;border:1px solid #222;border-radius:8px;padding:14px;text-align:center}
-.stat-num{font-size:26px;font-weight:700;line-height:1;margin-bottom:4px}
-.stat-lbl{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.06em}
-.tabs{display:flex;gap:0;border:1px solid #222;border-radius:8px;overflow:hidden;margin-bottom:20px}
-.tab{flex:1;padding:10px;font-size:13px;font-weight:600;background:transparent;border:none;color:#555;cursor:pointer;transition:background .15s,color .15s}
-.tab:not(:last-child){border-right:1px solid #222}
-.tab.active{background:#1a1a1a;color:#E8FF00}
-.tab:hover:not(.active){color:#ccc}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--lg);font-family:var(--f-b);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ── Grid bg ── */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(232,255,0,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(232,255,0,.022) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* ── Top bar ── */
+.topbar{position:sticky;top:0;z-index:200;background:rgba(10,10,10,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--dg);padding:0 24px;height:56px;display:flex;align-items:center;gap:20px}
+.topbar-logo{font-family:var(--f-d);font-weight:900;font-size:20px;text-transform:uppercase;color:var(--white);letter-spacing:-.5px;flex-shrink:0}
+.topbar-logo span{color:var(--lime)}
+.topbar-tool{font-family:var(--f-m);font-size:9px;color:var(--mg);letter-spacing:.18em;text-transform:uppercase;border-left:1px solid var(--dg);padding-left:16px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.proxy-pill{display:flex;align-items:center;gap:6px;font-family:var(--f-m);font-size:9px;color:var(--mg);background:var(--black-r);border:1px solid var(--dg);padding:5px 10px;border-radius:3px}
+.proxy-dot{width:6px;height:6px;border-radius:50%;background:var(--dg);flex-shrink:0;transition:background .3s}
+.proxy-dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+.proxy-dot.off{background:var(--red)}
+.proxy-dot.checking{background:var(--orange);animation:pulse .9s infinite}
+
+/* ── Stage pipeline ── */
+.pipeline-wrap{position:relative;z-index:1;padding:32px 24px 0;max-width:1100px;margin:0 auto}
+.pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--dg);background:var(--black-r);overflow:hidden}
+.stage{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 8px 14px;gap:6px;cursor:pointer;border-right:1px solid var(--dg);transition:background .2s;position:relative;min-height:88px}
+.stage:last-child{border-right:none}
+.stage::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:transparent;transition:background .2s}
+.stage.done::before{background:var(--green)}
+.stage.active::before{background:var(--lime)}
+.stage:hover:not(.active){background:rgba(232,255,0,.03)}
+.stage.active{background:rgba(232,255,0,.05)}
+.stage-num{font-family:var(--f-m);font-size:8px;color:var(--mg);letter-spacing:.1em}
+.stage-label{font-family:var(--f-d);font-size:15px;font-weight:700;text-transform:uppercase;color:var(--lg);letter-spacing:.3px;transition:color .2s}
+.stage.active .stage-label{color:var(--lime)}
+.stage.done .stage-label{color:var(--green)}
+.stage-sub{font-family:var(--f-m);font-size:9px;color:var(--mg);text-align:center;line-height:1.4;letter-spacing:.04em}
+.stage-check{font-size:11px;color:var(--green);font-weight:700;display:none}
+.stage.done .stage-check{display:block}
+.stage-arrow{position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:var(--f-m);font-size:10px;color:var(--dg);z-index:2}
+.stage:last-child .stage-arrow{display:none}
+
+/* ── Stats bar ── */
+.stats-bar{max-width:1100px;margin:12px auto 0;padding:0 24px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.stat{background:var(--black-r);border:1px solid var(--dg);padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.stat-val{font-family:var(--f-d);font-size:24px;font-weight:900;line-height:1}
+.stat-lbl{font-family:var(--f-m);font-size:8px;color:var(--mg);text-transform:uppercase;letter-spacing:.12em}
+
+/* ── Main layout ── */
+.main{max-width:1100px;margin:20px auto 80px;padding:0 24px;position:relative;z-index:1}
+
+/* ── Panels ── */
 .panel{display:none}
 .panel.active{display:block}
-.card{background:#111;border:1px solid #222;border-radius:8px;padding:18px;margin-bottom:14px}
-.card-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
-.trend-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #222;border-radius:6px;cursor:pointer;margin-bottom:6px;background:#0d0d0d;transition:border-color .15s,background .15s}
-.trend-item:hover{background:#151515;border-color:#333}
-.trend-item.selected{border-color:#E8FF00;background:#1a1a00}
-.trend-name{font-size:14px;font-weight:600;color:#e8e8e8;flex:1}
-.trend-vol{font-size:12px;color:#555}
-.badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
-.badge-breakout{background:#2a0000;color:#ff6b6b}
-.badge-hot{background:#2a1a00;color:#ffa500}
-.badge-rising{background:#002a00;color:#00cc66}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.field{display:flex;flex-direction:column;gap:5px}
-.field label{font-size:12px;color:#666}
-select,input{background:#0d0d0d;border:1px solid #222;border-radius:6px;color:#e8e8e8;padding:9px 12px;font-size:13px;width:100%;outline:none;transition:border-color .15s}
-select:focus,input:focus{border-color:#E8FF00}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s}
-.btn-primary{background:#E8FF00;color:#000}
-.btn-primary:hover{opacity:.85}
-.btn-primary:disabled{opacity:.4;cursor:not-allowed}
-.btn-ghost{background:#1a1a1a;color:#ccc;border:1px solid #333}
-.btn-ghost:hover{border-color:#555}
+
+/* ── Cards ── */
+.card{background:var(--black-r);border:1px solid var(--dg);margin-bottom:12px}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--dg);background:var(--black-s)}
+.card-title{font-family:var(--f-m);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--lime)}
+.card-body{padding:16px}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;font-family:var(--f-d);font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s;flex-shrink:0}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-lime{background:var(--lime);color:var(--black)}.btn-lime:hover:not(:disabled){background:var(--lime-d)}
+.btn-ghost{background:transparent;color:var(--lg);border:1px solid var(--dg)}.btn-ghost:hover:not(:disabled){border-color:var(--mg);color:var(--white)}
+.btn-green{background:var(--green);color:var(--black)}.btn-green:hover:not(:disabled){opacity:.88}
+.btn-sm{padding:7px 12px;font-size:12px}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.output-box{background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:420px;overflow-y:auto;margin-top:8px;cursor:pointer}
-.output-val{font-size:14px;font-weight:600;color:#e8e8e8;background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px 12px;cursor:pointer;transition:border-color .15s;margin-top:4px}
-.output-val:hover{border-color:#E8FF00}
-.output-slug{font-family:monospace;color:#00b4ff;font-size:13px}
-.output-label{font-size:12px;color:#555;margin-bottom:4px}
-.loading{display:flex;align-items:center;gap:10px;color:#666;font-size:13px;padding:12px 0}
-.spinner{width:16px;height:16px;border:2px solid #333;border-top-color:#E8FF00;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+
+/* ── Form fields ── */
+label{font-family:var(--f-m);font-size:9px;color:var(--mg);letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:5px}
+input,select,textarea{background:var(--black);border:1px solid var(--dg);color:var(--lg);font-family:var(--f-m);font-size:11px;padding:9px 12px;width:100%;outline:none;transition:border-color .15s;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--lime)}
+.field{margin-bottom:12px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ── Trend items ── */
+.trend-list{display:flex;flex-direction:column;gap:4px}
+.trend-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--dg);background:var(--black);cursor:pointer;transition:all .15s}
+.trend-item:hover{border-color:var(--mg);background:var(--black-r)}
+.trend-item.selected{border-color:var(--lime);background:rgba(232,255,0,.05)}
+.trend-rank{font-family:var(--f-m);font-size:10px;color:var(--dg);width:18px;flex-shrink:0;text-align:right}
+.trend-name{font-family:var(--f-d);font-size:16px;font-weight:700;text-transform:uppercase;color:var(--white);flex:1;letter-spacing:.3px}
+.trend-vol{font-family:var(--f-m);font-size:10px;color:var(--mg)}
+.badge{font-family:var(--f-m);font-size:8px;font-weight:700;padding:2px 7px;letter-spacing:.1em;text-transform:uppercase;border-radius:2px}
+.badge-breakout{background:#330000;color:#ff6b6b;border:1px solid #550000}
+.badge-hot{background:#2a1500;color:var(--orange);border:1px solid #443000}
+.badge-rising{background:#001a00;color:var(--green);border:1px solid #003300}
+.trend-time{font-family:var(--f-m);font-size:9px;color:var(--dg)}
+
+/* ── Source bar ── */
+.source-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--black);border:1px solid var(--dg);border-top:none;font-family:var(--f-m);font-size:9px;color:var(--mg)}
+.source-label{color:var(--green)}
+
+/* ── Selected topic display ── */
+.selected-topic{font-family:var(--f-d);font-size:20px;font-weight:800;text-transform:uppercase;color:var(--lime);padding:12px 16px;background:rgba(232,255,0,.05);border:1px solid rgba(232,255,0,.2);margin-bottom:10px;letter-spacing:.3px}
+.selected-topic.empty{color:var(--mg);background:var(--black);border-color:var(--dg)}
+
+/* ── Spinner / loading ── */
+.spinner{width:14px;height:14px;border:2px solid var(--dg);border-top-color:var(--lime);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
-.success{background:#002200;border:1px solid #00aa00;border-radius:6px;padding:10px 14px;font-size:13px;color:#00cc66;margin-top:10px}
-.error{background:#220000;border:1px solid #aa0000;border-radius:6px;padding:10px 14px;font-size:13px;color:#ff6b6b;margin-top:10px}
-.info{background:#001a2a;border:1px solid #004466;border-radius:6px;padding:10px 14px;font-size:13px;color:#66aacc;margin-top:10px}
-.proxy-status{display:flex;align-items:center;gap:8px;font-size:12px;color:#555;margin-bottom:16px;padding:8px 12px;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:6px}
-.proxy-dot{width:8px;height:8px;border-radius:50%;background:#333;flex-shrink:0}
-.proxy-dot.online{background:#00cc66;box-shadow:0 0 6px #00cc66}
-.proxy-dot.offline{background:#ff6b6b}
-.proxy-dot.checking{background:#ffa500;animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.kw-tag{display:inline-flex;align-items:center;padding:4px 10px;background:#111;border:1px solid #222;border-radius:4px;font-size:12px;margin:3px;cursor:pointer;transition:border-color .15s,color .15s}
-.kw-tag:hover,.kw-tag.sel{border-color:#E8FF00;color:#E8FF00}
-.wp-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
-.wp-field label{font-size:12px;color:#666}
+.loading-row{display:flex;align-items:center;gap:10px;padding:16px;font-family:var(--f-m);font-size:11px;color:var(--mg)}
+
+/* ── Progress bar ── */
+.progress-wrap{height:3px;background:var(--dg);overflow:hidden;margin-bottom:12px}
+.progress-fill{height:100%;background:var(--lime);transition:width .4s;width:0}
+
+/* ── Article type pills ── */
+.art-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.art-pill{padding:10px 12px;border:1px solid var(--dg);cursor:pointer;transition:all .15s;background:var(--black);text-align:center}
+.art-pill:hover{border-color:var(--mg)}
+.art-pill.active{border-color:var(--lime);background:rgba(232,255,0,.05)}
+.art-pill-name{font-family:var(--f-d);font-size:14px;font-weight:700;text-transform:uppercase;color:var(--white);display:block;margin-bottom:2px}
+.art-pill-sub{font-family:var(--f-m);font-size:8px;color:var(--mg);letter-spacing:.08em}
+
+/* ── Edit panel ── */
+.edit-field-title{font-family:var(--f-d);font-size:13px;font-weight:700;text-transform:uppercase;color:var(--lg);letter-spacing:.2px;padding:8px 0 4px;border-bottom:1px solid var(--dg);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.edit-hint{font-family:var(--f-m);font-size:9px;color:var(--mg);font-weight:400;text-transform:none;letter-spacing:0}
+#out-title-input{font-family:var(--f-d);font-size:20px;font-weight:800;text-transform:uppercase;color:var(--lime);padding:12px 14px;letter-spacing:.3px;border-color:rgba(232,255,0,.3)}
+#out-slug-input{font-family:var(--f-m);font-size:12px;color:var(--blue);border-color:rgba(0,180,255,.3)}
+#out-body-input{font-family:var(--f-m);font-size:11px;min-height:320px;color:var(--lg);line-height:1.75;border-color:var(--dg)}
+.char-count{font-family:var(--f-m);font-size:9px;color:var(--mg);text-align:right;margin-top:3px}
+
+/* ── SERP panel ── */
+.serp-panel{background:var(--black);border:1px solid var(--dg);padding:0;overflow:hidden;margin-top:10px;display:none}
+.serp-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--black-s);border-bottom:1px solid var(--dg)}
+.serp-body{padding:14px;max-height:360px;overflow-y:auto}
+.serp-section-title{font-family:var(--f-m);font-size:9px;color:var(--lime);text-transform:uppercase;letter-spacing:.14em;margin:12px 0 6px;padding-top:12px;border-top:1px solid var(--dg)}
+.serp-section-title:first-child{margin-top:0;padding-top:0;border-top:none}
+.serp-result{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.serp-result:last-child{border-bottom:none}
+.serp-result-title{font-family:var(--f-d);font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px}
+.serp-result-url{font-family:var(--f-m);font-size:9px;color:var(--blue);margin-bottom:3px}
+.serp-result-desc{font-family:var(--f-m);font-size:10px;color:var(--mg);line-height:1.5}
+.paa-item{padding:8px 10px;background:rgba(232,255,0,.03);border:1px solid rgba(232,255,0,.08);margin-bottom:4px}
+.paa-q{font-family:var(--f-d);font-size:13px;font-weight:700;color:var(--white);margin-bottom:3px}
+.paa-a{font-family:var(--f-m);font-size:10px;color:var(--mg);line-height:1.5}
+.related-tags{display:flex;flex-wrap:wrap;gap:5px}
+.related-tag{font-family:var(--f-m);font-size:9px;padding:3px 8px;border:1px solid var(--dg);color:var(--mg);cursor:pointer;transition:border-color .15s}
+.related-tag:hover{border-color:var(--mg);color:var(--lg)}
+
+/* ── HTML preview ── */
+.html-preview{background:var(--black);border:1px solid var(--dg);padding:14px;font-family:var(--f-m);font-size:10px;color:var(--mg);line-height:1.6;max-height:200px;overflow-y:auto;word-break:break-all;margin-top:8px}
+
+/* ── WP status ── */
+.wp-success{background:#001a00;border:1px solid #004400;color:var(--green);font-family:var(--f-m);font-size:11px;padding:10px 14px;margin-top:10px}
+.wp-error{background:#1a0000;border:1px solid #440000;color:var(--red);font-family:var(--f-m);font-size:11px;padding:10px 14px;margin-top:10px}
+.wp-info{background:#001a33;border:1px solid #003366;color:var(--blue);font-family:var(--f-m);font-size:11px;padding:10px 14px;margin-top:10px}
+
+/* ── Publish checklist ── */
 .checklist{display:flex;flex-direction:column;gap:8px}
-.checklist label{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:#aaa}
-.checklist input[type=checkbox]{width:16px;height:16px;accent-color:#E8FF00;flex-shrink:0}
-a{color:#E8FF00;text-decoration:none}
-.html-preview{background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:14px;font-size:12px;font-family:monospace;line-height:1.6;max-height:300px;overflow-y:auto;color:#aaa;margin-top:8px;word-break:break-all}
-.version-badge{background:#1a1a00;border:1px solid #333300;color:#E8FF00;font-size:10px;padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:500;letter-spacing:.08em}
+.check-item{display:flex;align-items:center;gap:10px;font-family:var(--f-m);font-size:11px;color:var(--mg);cursor:pointer;padding:8px 10px;border:1px solid transparent;transition:border-color .15s}
+.check-item:hover{border-color:var(--dg)}
+.check-item input{width:14px;height:14px;accent-color:var(--lime);flex-shrink:0}
+.check-item.checked{color:var(--green)}
+
+/* ── Settings ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ── Notifications ── */
+.notif{position:fixed;bottom:24px;right:24px;background:var(--black-r);border:1px solid var(--dg);border-left:3px solid var(--lime);padding:12px 16px;font-family:var(--f-m);font-size:11px;color:var(--lg);z-index:999;max-width:320px;transform:translateX(140%);transition:transform .3s}
+.notif.show{transform:none}
+.notif.error{border-left-color:var(--red)}
+.notif.success{border-left-color:var(--green)}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--black)}
+::-webkit-scrollbar-thumb{background:var(--dg)}
+::-webkit-scrollbar-thumb:hover{background:var(--mg)}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:768px){
+  .pipeline{grid-template-columns:repeat(3,1fr)}
+  .stats-bar{grid-template-columns:repeat(3,1fr)}
+  .field-row{grid-template-columns:1fr}
+  .art-grid{grid-template-columns:1fr 1fr}
+  .settings-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-<h1>TrendBlog AI — World Cup 2026 <span class="version-badge">v4.1 — Live Trends + Fact-Checked</span></h1>
-<p class="sub">Pulls LIVE trending topics from Google Trends · Searches current news for facts · Publishes BSM-styled HTML to WordPress</p>
-
-<div class="proxy-status">
-  <div class="proxy-dot checking" id="proxy-dot"></div>
-  <span id="proxy-status-text">Checking proxy server...</span>
-  <span style="font-size:11px;font-family:monospace;color:#00b4ff;margin-left:auto">https://sportsmag-trendblog-proxy.onrender.com</span>
-</div>
-
-<div class="stats">
-  <div class="stat"><div class="stat-num" style="color:#ff6b6b" id="st-days">11</div><div class="stat-lbl">Days to kickoff</div></div>
-  <div class="stat"><div class="stat-num" style="color:#00cc66" id="st-gen">0</div><div class="stat-lbl">Generated</div></div>
-  <div class="stat"><div class="stat-num" style="color:#00b4ff" id="st-pub">0</div><div class="stat-lbl">Published</div></div>
-  <div class="stat"><div class="stat-num" style="color:#ffa500" id="st-needed">48</div><div class="stat-lbl">Articles needed</div></div>
-</div>
-
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('trends')">📈 Trends</button>
-  <button class="tab" onclick="switchTab('generate')">✍️ Generate</button>
-  <button class="tab" onclick="switchTab('publish')">🚀 Publish</button>
-  <button class="tab" onclick="switchTab('settings')">⚙️ Settings</button>
-</div>
-
-<!-- TRENDS -->
-<div class="panel active" id="tab-trends">
-  <div class="card">
-    <div class="card-label">World Cup 2026 — Trending Now · US Sports · Active Only</div>
-    <div id="trend-list"></div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" onclick="loadTrends()">🔄 Refresh</button>
+<!-- TOP BAR -->
+<nav class="topbar">
+  <div class="topbar-logo">Best<span>Sports</span>Mag</div>
+  <div class="topbar-tool">TrendBlog AI v5 &mdash; World Cup 2026</div>
+  <div class="topbar-right">
+    <div class="proxy-pill">
+      <div class="proxy-dot checking" id="proxy-dot"></div>
+      <span id="proxy-txt">Connecting...</span>
     </div>
   </div>
-  <div class="card">
-    <div class="card-label">Selected topic</div>
-    <div id="selected-display" style="font-size:14px;color:#555;padding:6px 0">No topic selected</div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btn-go-gen" onclick="switchTab('generate')" disabled style="opacity:.4">Generate article →</button>
+</nav>
+
+<!-- PIPELINE -->
+<div class="pipeline-wrap">
+  <div class="pipeline">
+    <div class="stage active" id="stage-1" onclick="switchStage(1)">
+      <div class="stage-num">01</div>
+      <div class="stage-label">Discover</div>
+      <div class="stage-sub">Live Google Trends</div>
+      <div class="stage-check">Done</div>
+      <div class="stage-arrow">&#8250;</div>
     </div>
-  </div>
-  <div class="card">
-    <div class="card-label">Or enter your own keyword</div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <input type="text" id="custom-kw" placeholder="e.g. World Cup 2026 Group B preview" style="flex:1">
-      <button class="btn btn-primary" onclick="useCustomKw()">Use this →</button>
+    <div class="stage" id="stage-2" onclick="switchStage(2)">
+      <div class="stage-num">02</div>
+      <div class="stage-label">Research</div>
+      <div class="stage-sub">SERP + News + PAA</div>
+      <div class="stage-check">Done</div>
+      <div class="stage-arrow">&#8250;</div>
     </div>
-    <div class="card-label" style="margin-bottom:6px">Quick ideas</div>
-    <div id="kw-suggestions"></div>
+    <div class="stage" id="stage-3" onclick="switchStage(3)">
+      <div class="stage-num">03</div>
+      <div class="stage-label">Generate</div>
+      <div class="stage-sub">Claude writes article</div>
+      <div class="stage-check">Done</div>
+      <div class="stage-arrow">&#8250;</div>
+    </div>
+    <div class="stage" id="stage-4" onclick="switchStage(4)">
+      <div class="stage-num">04</div>
+      <div class="stage-label">Edit</div>
+      <div class="stage-sub">Review + adjust</div>
+      <div class="stage-check">Done</div>
+      <div class="stage-arrow">&#8250;</div>
+    </div>
+    <div class="stage" id="stage-5" onclick="switchStage(5)">
+      <div class="stage-num">05</div>
+      <div class="stage-label">Publish</div>
+      <div class="stage-sub">WordPress live</div>
+      <div class="stage-check">Done</div>
+    </div>
   </div>
 </div>
 
-<!-- GENERATE -->
-<div class="panel" id="tab-generate">
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat"><div class="stat-val" style="color:var(--red)" id="st-days">6</div><div class="stat-lbl">Days to kickoff</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--lime)" id="st-gen">0</div><div class="stat-lbl">Generated</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--green)" id="st-pub">0</div><div class="stat-lbl">Published</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--orange)" id="st-remain">48</div><div class="stat-lbl">Articles needed</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--blue)" id="st-cost">$0.00</div><div class="stat-lbl">API spend</div></div>
+</div>
+
+<!-- MAIN PANELS -->
+<div class="main">
+
+<!-- ═══════════════════════════════════════════════════════
+     STAGE 1 — DISCOVER
+═══════════════════════════════════════════════════════ -->
+<div class="panel active" id="panel-1">
+
   <div class="card">
-    <div class="card-label" style="margin-bottom:8px">Article settings</div>
-    <div class="field-row">
-      <div class="field">
-        <label>Article type</label>
-        <select id="art-type">
-          <option value="news">Breaking news / trending story</option>
-          <option value="preview">Match preview / prediction</option>
-          <option value="guide">Complete guide / explainer</option>
-          <option value="review">Gear / product review</option>
-          <option value="analysis">Team / player analysis</option>
-          <option value="listicle">Best of / top 10 list</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Word count</label>
-        <select id="word-count">
-          <option value="1200">1,200 words</option>
-          <option value="1600" selected>1,600 words</option>
-          <option value="2000">2,000 words</option>
-          <option value="2500">2,500 words</option>
-        </select>
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Affiliate links</label>
-        <select id="aff-type">
-          <option value="gear">Football gear (Impact.com)</option>
-          <option value="cards">Collectibles / Topps (Impact.com)</option>
-          <option value="amazon">Amazon Associates</option>
-          <option value="none">No affiliate links</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Target audience</label>
-        <select id="audience">
-          <option value="global">Global football fans</option>
-          <option value="us">US soccer fans</option>
-          <option value="uk">UK football fans</option>
-          <option value="collectors">Card collectors</option>
+    <div class="card-head">
+      <div class="card-title">Live Google Trends &mdash; Sports</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="loadTrends()">Refresh</button>
+        <select id="geo-select" style="width:auto;padding:6px 10px;font-size:10px;background:var(--black);border-color:var(--dg)" onchange="loadTrends()">
+          <option value="US">US</option>
+          <option value="GB">UK</option>
+          <option value="GLOBAL">Global</option>
+          <option value="BD">Bangladesh</option>
         </select>
       </div>
     </div>
+    <div class="card-body" style="padding:10px">
+      <div id="trend-list" class="trend-list">
+        <div class="loading-row"><div class="spinner"></div>Loading live trends...</div>
+      </div>
+    </div>
+    <div class="source-bar">
+      <span id="trends-source-label" class="source-label">Fetching...</span>
+      <span id="trends-time" style="font-family:var(--f-m);font-size:9px;color:var(--dg)"></span>
+    </div>
   </div>
 
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div>
-        <div class="card-label">Current topic</div>
-        <div id="gen-topic" style="font-size:14px;font-weight:600;color:#E8FF00">None selected</div>
+    <div class="card-head"><div class="card-title">Custom Keyword</div></div>
+    <div class="card-body">
+      <div style="display:flex;gap:8px">
+        <input type="text" id="custom-kw" placeholder="e.g. World Cup 2026 Group B preview — England vs USA" style="flex:1">
+        <button class="btn btn-lime btn-sm" onclick="useCustomKw()">Use This</button>
       </div>
-      <div style="text-align:right">
-        <div class="card-label">Estimated read time</div>
-        <div id="gen-readtime" style="font-size:14px;font-weight:600">—</div>
-      </div>
-    </div>
-    <div class="info" style="margin-bottom:12px">
-      ✅ <strong>v4.1:</strong> <strong>Live Google Trends</strong> in Trends tab. <strong>Brave Search + SerpAPI</strong> fetch current news before Claude writes. Articles are fact-checked against today's sources — not training data.
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btn-gen" onclick="generateArticle()">✍️ Generate BSM-styled article</button>
-    </div>
-    <div id="gen-loading" style="display:none">
-      <div class="loading"><div class="spinner"></div>Claude is writing and styling your article — 20–40 seconds...</div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px" id="kw-suggestions"></div>
     </div>
   </div>
 
-  <div id="article-section" style="display:none">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div class="card-label">Generated article — BSM styled HTML ready</div>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="copyField('out-title')">Copy title</button>
-          <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="copyField('out-meta')">Copy meta</button>
-          <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="copyRaw()">Copy raw text</button>
+  <div class="card">
+    <div class="card-head"><div class="card-title">Selected Topic</div></div>
+    <div class="card-body">
+      <div id="selected-display" class="selected-topic empty">No topic selected &mdash; click a trend above</div>
+      <div class="btn-row">
+        <button class="btn btn-lime" id="btn-go-research" onclick="goResearch()" disabled>Research This Topic &rarr;</button>
+        <button class="btn btn-ghost" onclick="switchStage(3);generateArticle()" id="btn-skip-to-gen" disabled>Skip to Generate</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     STAGE 2 — RESEARCH (SERP)
+═══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-2">
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">SERP Analysis</div>
+      <button class="btn btn-ghost btn-sm" onclick="runSerp()">Re-run Analysis</button>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div id="serp-main-body" class="serp-body" style="max-height:480px">
+        <div class="loading-row"><div class="spinner"></div>Running SERP analysis...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-lime" onclick="switchStage(3);generateArticle()">Generate Article &rarr;</button>
+    <button class="btn btn-ghost" onclick="switchStage(1)">Back to Trends</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     STAGE 3 — GENERATE
+═══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-3">
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Article Settings</div></div>
+    <div class="card-body">
+      <div class="art-grid">
+        <div class="art-pill active" data-type="news" onclick="selectType(this)"><span class="art-pill-name">Breaking News</span><span class="art-pill-sub">Trending story</span></div>
+        <div class="art-pill" data-type="preview" onclick="selectType(this)"><span class="art-pill-name">Match Preview</span><span class="art-pill-sub">Prediction piece</span></div>
+        <div class="art-pill" data-type="guide" onclick="selectType(this)"><span class="art-pill-name">Complete Guide</span><span class="art-pill-sub">Explainer</span></div>
+        <div class="art-pill" data-type="analysis" onclick="selectType(this)"><span class="art-pill-name">Analysis</span><span class="art-pill-sub">Team or player</span></div>
+        <div class="art-pill" data-type="listicle" onclick="selectType(this)"><span class="art-pill-name">Best Of List</span><span class="art-pill-sub">Top 10 format</span></div>
+        <div class="art-pill" data-type="review" onclick="selectType(this)"><span class="art-pill-name">Gear Review</span><span class="art-pill-sub">Product review</span></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Word Count</label>
+          <select id="word-count">
+            <option value="1200">1,200 words</option>
+            <option value="1600" selected>1,600 words</option>
+            <option value="2000">2,000 words</option>
+            <option value="2500">2,500 words</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Affiliate Links</label>
+          <select id="aff-type">
+            <option value="gear">Football gear (Impact.com)</option>
+            <option value="cards">Collectibles (Impact.com)</option>
+            <option value="amazon">Amazon Associates</option>
+            <option value="none">No affiliate links</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Target Audience</label>
+          <select id="audience">
+            <option value="global">Global football fans</option>
+            <option value="us">US soccer fans</option>
+            <option value="uk">UK football fans</option>
+            <option value="collectors">Card collectors</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tone</label>
+          <select id="tone">
+            <option value="editorial">Fast and editorial</option>
+            <option value="analytical">Data-driven</option>
+            <option value="conversational">Fan-focused</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title" id="gen-topic-label">Topic: None selected</div>
+      <div style="font-family:var(--f-m);font-size:9px;color:var(--mg)" id="gen-readtime"></div>
+    </div>
+    <div class="card-body">
+      <div id="gen-status" style="display:none">
+        <div class="progress-wrap"><div class="progress-fill" id="gen-progress"></div></div>
+        <div class="loading-row"><div class="spinner"></div><span id="gen-status-text">Initialising...</span></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-lime" id="btn-gen" onclick="generateArticle()">Generate Article</button>
+        <button class="btn btn-ghost" onclick="switchStage(2)">View SERP First</button>
+        <button class="btn btn-ghost" onclick="switchStage(1)">Change Topic</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     STAGE 4 — EDIT
+═══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-4">
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Edit Article</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="generateArticle()">Regenerate</button>
+        <button class="btn btn-ghost btn-sm" onclick="showSerpInline()">SERP Analysis</button>
+        <button class="btn btn-lime btn-sm" onclick="switchStage(5)">Looks Good &rarr; Publish</button>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- SEO Title -->
+      <div class="edit-field-title">SEO Title <span class="edit-hint">Edit freely — this becomes your H1 and page title</span></div>
+      <input type="text" id="out-title-input" placeholder="Article title here..." oninput="state.title=this.value">
+
+      <!-- Slug -->
+      <div class="edit-field-title" style="margin-top:10px">URL Slug <span class="edit-hint">Auto-cleaned to lowercase-hyphenated</span></div>
+      <input type="text" id="out-slug-input" placeholder="article-slug-here" oninput="syncSlug(this.value)">
+
+      <!-- Meta -->
+      <div class="edit-field-title" style="margin-top:10px">Meta Description <span class="edit-hint">150-155 chars for best SEO</span></div>
+      <textarea id="out-meta-input" rows="2" placeholder="Meta description..." oninput="state.meta=this.value;updateCharCount()"></textarea>
+      <div class="char-count"><span id="meta-chars">0</span>/155 chars</div>
+
+      <!-- Body -->
+      <div class="edit-field-title" style="margin-top:10px">Article Body <span class="edit-hint">Markdown — edits update HTML preview live</span></div>
+      <textarea id="out-body-input" rows="22" placeholder="Article body will appear here after generation..." oninput="state.content=this.value;livePreview()"></textarea>
+
+      <!-- Inline SERP -->
+      <div class="serp-panel" id="serp-inline">
+        <div class="serp-head">
+          <span style="font-family:var(--f-m);font-size:9px;color:var(--lime);text-transform:uppercase;letter-spacing:.14em">SERP Analysis &mdash; <span id="serp-kw-show"></span></span>
+          <button onclick="document.getElementById('serp-inline').style.display='none'" class="btn btn-ghost btn-sm">Close</button>
+        </div>
+        <div class="serp-body" id="serp-inline-body">Loading...</div>
+      </div>
+
+      <!-- HTML preview -->
+      <div class="edit-field-title" style="margin-top:12px">HTML Preview <span class="edit-hint">What gets published to WordPress</span></div>
+      <div class="html-preview" id="out-html-preview"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-lime" onclick="switchStage(5)">Publish to WordPress &rarr;</button>
+        <button class="btn btn-ghost" onclick="copyHtml()">Copy HTML</button>
+        <button class="btn btn-ghost" onclick="copyAll()">Copy All Fields</button>
+        <button class="btn btn-ghost" onclick="generateArticle()">Regenerate</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     STAGE 5 — PUBLISH
+═══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-5">
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">WordPress Connection</div></div>
+        <div class="card-body">
+          <div class="field">
+            <label>Site URL</label>
+            <input type="text" id="wp-url" value="https://bestsportsmag.com">
+          </div>
+          <div class="field">
+            <label>Username</label>
+            <input type="text" id="wp-user" value="bsmeditorialstaff">
+          </div>
+          <div class="field">
+            <label>Application Password</label>
+            <input type="password" id="wp-pass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx">
+          </div>
+          <div class="field">
+            <label>Category ID</label>
+            <input type="text" id="wp-cat" placeholder="e.g. 5 (World Cup 2026)">
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="testWP()">Test Connection</button>
+          </div>
+          <div id="wp-test-result"></div>
         </div>
       </div>
 
-      <div class="output-label">SEO Title</div>
-      <div class="output-val" id="out-title" onclick="copyField('out-title')"></div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Article to Publish</div></div>
+        <div class="card-body">
+          <div style="font-family:var(--f-m);font-size:10px;color:var(--mg);line-height:2">
+            Title: <strong style="color:var(--lime)" id="pub-title-preview">—</strong><br>
+            Slug: <strong style="color:var(--blue)" id="pub-slug-preview">—</strong><br>
+            Words: <strong style="color:var(--white)" id="pub-words">—</strong><br>
+            FAQs: <strong style="color:var(--white)" id="pub-faqs">—</strong><br>
+            Status: <strong id="pub-status" style="color:var(--mg)">Draft</strong>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-green" id="btn-publish" onclick="publishWP()">Publish Live Now</button>
+            <button class="btn btn-ghost btn-sm" onclick="switchStage(4)">Back to Edit</button>
+          </div>
+          <div id="pub-result"></div>
+        </div>
+      </div>
+    </div>
 
-      <div class="output-label" style="margin-top:10px">URL Slug</div>
-      <div class="output-val output-slug" id="out-slug" onclick="copyField('out-slug')"></div>
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Post-Publish Checklist</div></div>
+        <div class="card-body">
+          <div class="checklist">
+            <label class="check-item"><input type="checkbox" onchange="this.parentElement.classList.toggle('checked',this.checked)"> Set featured image in WordPress</label>
+            <label class="check-item"><input type="checkbox" onchange="this.parentElement.classList.toggle('checked',this.checked)"> Replace affiliate link placeholders with Impact.com tracking URLs</label>
+            <label class="check-item"><input type="checkbox" onchange="this.parentElement.classList.toggle('checked',this.checked)"> Replace internal link placeholders with real post URLs</label>
+            <label class="check-item"><input type="checkbox" onchange="this.parentElement.classList.toggle('checked',this.checked)"> Add Yoast SEO meta description</label>
+            <label class="check-item"><input type="checkbox" onchange="this.parentElement.classList.toggle('checked',this.checked)"> Assign correct category and tags</label>
+            <label class="check-item"><input type="checkbox" onchange="this.parentElement.classList.toggle('checked',this.checked)"> Share to social channels</label>
+          </div>
+        </div>
+      </div>
 
-      <div class="output-label" style="margin-top:10px">Meta Description</div>
-      <div class="output-val" id="out-meta" onclick="copyField('out-meta')" style="font-size:13px;color:#aaa"></div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Session</div></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:6px;font-family:var(--f-m);font-size:10px;color:var(--mg);line-height:2">
+            Generated this session: <strong style="color:var(--white)" id="sess-gen">0</strong>
+            Published this session: <strong style="color:var(--green)" id="sess-pub">0</strong>
+            Est. API cost: <strong style="color:var(--lime)" id="sess-cost">$0.00</strong>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="switchStage(1)">New Article</button>
+          </div>
+        </div>
+      </div>
 
-      <div class="output-label" style="margin-top:14px">BSM Styled HTML Preview <span style="color:#555;font-size:11px">(what gets published to WordPress)</span></div>
-      <div class="html-preview" id="out-html"></div>
-
-      <div class="output-label" style="margin-top:14px">Raw article text</div>
-      <div class="output-box" id="out-content"></div>
-
-      <div class="btn-row">
-        <button class="btn btn-primary" onclick="switchTab('publish')">Publish to WordPress →</button>
-        <button class="btn btn-ghost" onclick="generateArticle()">🔄 Regenerate</button>
+      <!-- Settings inline -->
+      <div class="card">
+        <div class="card-head"><div class="card-title">Quick Settings</div></div>
+        <div class="card-body">
+          <div class="field">
+            <label>Proxy URL</label>
+            <input type="text" id="proxy-url" value="https://sportsmag-trendblog-proxy.onrender.com" onchange="PROXY=this.value">
+          </div>
+          <div class="field">
+            <label>Publication Name</label>
+            <input type="text" id="pub-name" value="BestSportsMag">
+          </div>
+          <div class="field">
+            <label>Author Byline</label>
+            <input type="text" id="pub-author" value="BSM Editorial Staff">
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="checkProxy()">Check Proxy</button>
+          <div id="proxy-check-result" style="margin-top:8px"></div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- PUBLISH -->
-<div class="panel" id="tab-publish">
-  <div class="card">
-    <div class="card-label">WordPress connection</div>
-    <div class="wp-field">
-      <label>Site URL</label>
-      <input type="text" id="wp-url" value="https://bestsportsmag.com">
-    </div>
-    <div class="wp-field">
-      <label>Username</label>
-      <input type="text" id="wp-user" placeholder="admin">
-    </div>
-    <div class="wp-field">
-      <label>Application Password</label>
-      <input type="password" id="wp-pass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx">
-    </div>
-    <div class="wp-field">
-      <label>Category ID</label>
-      <input type="text" id="wp-cat" placeholder="e.g. 5">
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" onclick="testWP()">🔌 Test connection</button>
-      <button class="btn btn-primary" id="btn-pub" onclick="publishWP()" disabled style="opacity:.4">🚀 Publish with BSM styling</button>
-    </div>
-    <div id="wp-status"></div>
-  </div>
+</div><!-- /main -->
 
-  <div class="card">
-    <div class="card-label">What gets published</div>
-    <div style="font-size:13px;color:#aaa;line-height:1.8">
-      ✅ BSM-styled HTML with <code style="color:#E8FF00">.bsm-post-h2</code> classes on headings<br>
-      ✅ Lime accent border on all H2 sections (via your CSS)<br>
-      ✅ Affiliate placeholders converted to styled inline links<br>
-      ✅ FAQ section with Schema.org markup for rich results<br>
-      ✅ Proper paragraph and list formatting<br>
-      ✅ Internal link placeholders styled as BSM links
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-label">After publishing checklist</div>
-    <div class="checklist">
-      <label><input type="checkbox" id="chk-1"> Set featured image in WordPress (Media Library)</label>
-      <label><input type="checkbox" id="chk-2"> Replace affiliate link placeholders with real Impact.com URLs</label>
-      <label><input type="checkbox" id="chk-3"> Replace internal link placeholders with real post URLs</label>
-      <label><input type="checkbox" id="chk-4"> Add Yoast SEO meta description</label>
-      <label><input type="checkbox" id="chk-5"> Assign correct category and tags</label>
-    </div>
-  </div>
-</div>
-
-<!-- SETTINGS -->
-<div class="panel" id="tab-settings">
-  <div class="card">
-    <div class="card-label">Proxy server</div>
-    <div class="wp-field">
-      <label>Proxy URL</label>
-      <input type="text" id="proxy-url" value="https://sportsmag-trendblog-proxy.onrender.com">
-    </div>
-    <button class="btn btn-ghost" onclick="checkProxy()" style="margin-top:4px">Check status</button>
-    <div id="proxy-check-result" style="margin-top:8px"></div>
-  </div>
-  <div class="card">
-    <div class="card-label">Publication settings</div>
-    <div class="field-row">
-      <div class="field">
-        <label>Publication name</label>
-        <input type="text" id="pub-name" value="BestSportsMag">
-      </div>
-      <div class="field">
-        <label>Author byline</label>
-        <input type="text" id="pub-author" value="BSM Editorial Staff">
-      </div>
-    </div>
-    <div class="field">
-      <label>Default tone</label>
-      <select id="tone">
-        <option value="editorial">Fast, editorial, no fluff</option>
-        <option value="analytical">Data-driven and analytical</option>
-        <option value="conversational">Conversational and fan-focused</option>
-      </select>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-label">Session stats</div>
-    <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#aaa;margin-bottom:14px">
-      <div>Articles generated: <strong style="color:#e8e8e8" id="sess-gen">0</strong></div>
-      <div>Articles published: <strong style="color:#e8e8e8" id="sess-pub">0</strong></div>
-      <div>Estimated API cost: <strong style="color:#e8e8e8" id="sess-cost">$0.00</strong></div>
-    </div>
-    <button class="btn btn-ghost" onclick="resetSession()">🗑 Reset session</button>
-  </div>
-</div>
-
-</div>
+<!-- NOTIFICATION TOAST -->
+<div class="notif" id="notif"></div>
 
 <script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
 var PROXY = 'https://sportsmag-trendblog-proxy.onrender.com';
-var state = { topic:null, title:'', slug:'', meta:'', content:'', styledHtml:'', genCount:0, pubCount:0, cost:0 };
-
-var TRENDS = [
-  { name:'FIFA World Cup 2026 host cities guide', vol:'500K+', badge:'breakout', pct:'+1,000%', started:'2h ago' },
-  { name:'World Cup 2026 group stage draw results', vol:'200K+', badge:'breakout', pct:'+1,000%', started:'4h ago' },
-  { name:'Messi World Cup 2026 Argentina squad', vol:'200K+', badge:'breakout', pct:'+1,000%', started:'3h ago' },
-  { name:'World Cup 2026 schedule fixtures dates', vol:'200K+', badge:'hot', pct:'+800%', started:'6h ago' },
-  { name:'USA World Cup 2026 squad roster', vol:'100K+', badge:'hot', pct:'+650%', started:'5h ago' },
-  { name:'World Cup 2026 tickets how to buy', vol:'100K+', badge:'hot', pct:'+500%', started:'11h ago' },
-  { name:'England World Cup 2026 squad news', vol:'100K+', badge:'hot', pct:'+450%', started:'8h ago' },
-  { name:'Brazil World Cup 2026 lineup prediction', vol:'100K+', badge:'hot', pct:'+600%', started:'7h ago' },
-  { name:'France World Cup 2026 team preview', vol:'100K+', badge:'rising', pct:'+400%', started:'9h ago' },
-  { name:'World Cup 2026 bracket predictions', vol:'50K+', badge:'rising', pct:'+400%', started:'13h ago' },
-  { name:'World Cup 2026 best football boots', vol:'50K+', badge:'rising', pct:'+300%', started:'16h ago' },
-  { name:'Topps Chrome World Cup 2026 cards', vol:'50K+', badge:'rising', pct:'+500%', started:'14h ago' }
-];
-
-var KW_IDEAS = [
-  'World Cup 2026 Group A complete preview',
-  'World Cup 2026 best players to watch',
-  'World Cup 2026 stadiums and venues guide',
-  'How to watch World Cup 2026 in USA',
-  'World Cup 2026 top scorers predictions',
-  'Best World Cup 2026 football boots',
-  'World Cup 2026 collectibles cards to buy',
-  'World Cup 2026 dark horse teams'
-];
-
-var TYPE_MAP = {
-  news:'breaking news article — answer who, what, when, where, why in the first paragraph',
-  preview:'match preview with team form, key players, tactical analysis, and a clear prediction',
-  guide:'comprehensive guide covering all angles a reader needs',
-  review:'hands-on gear review with pros, cons, who should buy, where to buy',
-  analysis:'deep-dive analysis with stats, context, and expert perspective',
-  listicle:'numbered list article with each item clearly explained'
+var state = {
+  topic:   '',
+  title:   '',
+  slug:    '',
+  meta:    '',
+  content: '',
+  html:    '',
+  tags:    [],
+  faq:     [],
+  artType: 'news',
+  genCount: 0,
+  pubCount: 0,
+  cost:     0
 };
+var serpCache = null;
+var currentStage = 1;
+var stageDone = [false, false, false, false, false];
 
-var AFF_MAP = {
-  gear:'Include 2 natural affiliate link placeholders. Format exactly: [AFFILIATE: Product Name — $Price — Brand — via Impact.com]',
-  cards:'Include 2 collectibles affiliate placeholders. Format exactly: [AFFILIATE: Product Name — $Price — Brand — via Impact.com]',
-  amazon:'Include 2 Amazon product recommendations. Format exactly: [AMAZON: Product Name — $Price]',
-  none:'No affiliate links needed.'
-};
-
-var AUD_MAP = {
-  global:'global football fans — use football primarily, mention soccer for US readers occasionally',
-  us:'US audience — use soccer and cleats, reference MLS and USMNT',
-  uk:'UK audience — use football exclusively, reference Premier League',
-  collectors:'sports card collectors — use hobby terms like box breaks, parallels, PSA grading'
-};
-
-document.addEventListener('DOMContentLoaded', function() {
-  var kickoff = new Date('2026-06-11T17:00:00Z');
-  var days = Math.max(0, Math.ceil((kickoff - Date.now()) / 86400000));
-  document.getElementById('st-days').textContent = days;
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', function() {
+  checkProxy();
   loadTrends();
   loadKwSuggestions();
-  checkProxy();
-  document.getElementById('word-count').addEventListener('change', updateReadTime);
+  updateDaysCounter();
 });
 
+function updateDaysCounter() {
+  var kickoff = new Date('2026-06-11');
+  var now = new Date();
+  var days = Math.max(0, Math.ceil((kickoff - now) / 86400000));
+  var el = document.getElementById('st-days');
+  if (el) el.textContent = days;
+}
+
+// ═══════════════════════════════════════════════════════
+// PROXY
+// ═══════════════════════════════════════════════════════
 function checkProxy() {
+  PROXY = document.getElementById('proxy-url').value.trim().replace(/\/$/,'');
   var dot = document.getElementById('proxy-dot');
-  var txt = document.getElementById('proxy-status-text');
-  var proxyUrl = document.getElementById('proxy-url') ? document.getElementById('proxy-url').value : PROXY;
-  PROXY = proxyUrl;
+  var txt = document.getElementById('proxy-txt');
   dot.className = 'proxy-dot checking';
-  txt.textContent = 'Checking proxy...';
-  fetch(PROXY + '/', { method:'GET' })
+  txt.textContent = 'Connecting...';
+  fetch(PROXY + '/')
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      dot.className = 'proxy-dot online';
-      txt.textContent = 'Proxy online — ' + (d.version || d.status || 'running');
-      var r = document.getElementById('proxy-check-result');
-      if (r) r.innerHTML = '<div class="success">✅ Proxy v2.0 is online and ready</div>';
+      dot.className = 'proxy-dot on';
+      txt.textContent = d.version || 'Online';
     })
     .catch(function() {
-      dot.className = 'proxy-dot offline';
-      txt.textContent = 'Proxy sleeping — first request may take 50s to wake up';
-      var r = document.getElementById('proxy-check-result');
-      if (r) r.innerHTML = '<div class="error">⚠️ Proxy sleeping — click Generate and wait 50 seconds. This only happens after inactivity.</div>';
+      dot.className = 'proxy-dot off';
+      txt.textContent = 'Offline';
     });
 }
 
-function switchTab(tab) {
-  var tabs = ['trends','generate','publish','settings'];
-  document.querySelectorAll('.tab').forEach(function(t, i) { t.classList.toggle('active', tabs[i] === tab); });
-  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
-  document.getElementById('tab-' + tab).classList.add('active');
-  if (tab === 'generate') { document.getElementById('gen-topic').textContent = state.topic || 'None selected'; updateReadTime(); }
+document.getElementById('proxy-url').addEventListener('change', function() {
+  PROXY = this.value.trim().replace(/\/$/,'');
+  checkProxy();
+});
+
+// ═══════════════════════════════════════════════════════
+// STAGE NAVIGATION
+// ═══════════════════════════════════════════════════════
+function switchStage(n) {
+  currentStage = n;
+  document.querySelectorAll('.panel').forEach(function(p, i) {
+    p.classList.toggle('active', i + 1 === n);
+  });
+  document.querySelectorAll('.stage').forEach(function(s, i) {
+    s.classList.remove('active');
+    s.classList.toggle('done', stageDone[i]);
+    if (i + 1 === n) s.classList.add('active');
+  });
+  if (n === 5) updatePublishPreview();
 }
 
+function markStageDone(n) {
+  stageDone[n - 1] = true;
+  var el = document.getElementById('stage-' + n);
+  if (el) el.classList.add('done');
+}
+
+// ═══════════════════════════════════════════════════════
+// STAGE 1 — TRENDS
+// ═══════════════════════════════════════════════════════
 function loadTrends() {
-  var list = document.getElementById('trend-list');
-  var label = document.getElementById('trends-source-label');
-  list.innerHTML = '<div class="loading"><div class="spinner"></div>Fetching live trends from Google...</div>';
-  if (label) label.textContent = 'Fetching live trends from Google Trends...';
+  var list   = document.getElementById('trend-list');
+  var srcLbl = document.getElementById('trends-source-label');
+  var timeLbl = document.getElementById('trends-time');
+  list.innerHTML = '<div class="loading-row"><div class="spinner"></div>Fetching live trends...</div>';
+  srcLbl.textContent = 'Fetching...';
 
-  fetch(PROXY + '/trends')
+  var geo = document.getElementById('geo-select').value;
+
+  fetch(PROXY + '/trends?geo=' + geo + '&_=' + Date.now())
     .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var trends = data.trends || [];
-      if (label) {
-        label.textContent = data.source === 'fallback'
-          ? 'WORLD CUP 2026 — Curated Topics (Google Trends unavailable)'
-          : 'LIVE FROM GOOGLE TRENDS — ' + data.source + ' · Updated just now';
+    .then(function(d) {
+      srcLbl.textContent = d.source || 'unknown';
+      timeLbl.textContent = new Date().toLocaleTimeString();
+
+      var warn = document.getElementById('trends-warn-msg');
+
+      if (!d.trends || !d.trends.length) {
+        list.innerHTML = '<div style="padding:16px;font-family:var(--f-m);font-size:11px;color:var(--mg)">No trends returned. Try refreshing.</div>';
+        return;
       }
-      list.innerHTML = '';
-      trends.forEach(function(t, i) {
-        var d = document.createElement('div');
-        d.className = 'trend-item';
-        d.id = 'tr-' + i;
-        var bcls = t.badge === 'breakout' ? 'badge-breakout' : t.badge === 'hot' ? 'badge-hot' : 'badge-rising';
-        var blbl = t.badge === 'breakout' ? '🔥 Breakout' : t.badge === 'hot' ? '⚡ Hot' : '📈 Rising';
-        d.innerHTML = '<span class="trend-name">' + t.name + '</span><span class="trend-vol">' + t.vol + '</span><span class="badge ' + bcls + '">' + blbl + '</span><span style="font-size:11px;color:#444">' + t.started + '</span>';
-        d.onclick = function() { selectTrend(t, i); };
-        list.appendChild(d);
-      });
-      if (!trends.length) list.innerHTML = '<div style="color:#555;padding:12px;">No trends returned — try refreshing.</div>';
+
+      list.innerHTML = d.trends.map(function(t, i) {
+        var badgeCls = 'badge-' + (t.badge || 'rising');
+        return '<div class="trend-item" onclick="selectTrend(this,\'' + escJs(t.name) + '\')">'
+          + '<div class="trend-rank">' + (i + 1) + '</div>'
+          + '<div class="trend-name">' + escHtml(t.name) + '</div>'
+          + '<div class="trend-vol">' + (t.vol || '') + '</div>'
+          + '<span class="badge ' + badgeCls + '">' + (t.badge || 'rising').toUpperCase() + '</span>'
+          + '<div class="trend-time">' + (t.started || '') + '</div>'
+          + '</div>';
+      }).join('');
     })
-    .catch(function() {
-      if (label) label.textContent = 'WORLD CUP 2026 — Curated Topics (proxy offline)';
-      list.innerHTML = '';
-      getFallbackTrends().forEach(function(t, i) {
-        var d = document.createElement('div');
-        d.className = 'trend-item';
-        d.id = 'tr-' + i;
-        var bcls = t.badge === 'breakout' ? 'badge-breakout' : t.badge === 'hot' ? 'badge-hot' : 'badge-rising';
-        var blbl = t.badge === 'breakout' ? 'Breakout' : t.badge === 'hot' ? 'Hot' : 'Rising';
-        d.innerHTML = '<span class="trend-name">' + t.name + '</span><span class="trend-vol">' + t.vol + '</span><span class="badge ' + bcls + '">' + blbl + '</span><span style="font-size:11px;color:#444">' + t.started + '</span>';
-        d.onclick = function() { selectTrend(t, i); };
-        list.appendChild(d);
-      });
+    .catch(function(e) {
+      list.innerHTML = '<div style="padding:16px;font-family:var(--f-m);font-size:11px;color:var(--red)">Failed: ' + e.message + '</div>';
+      srcLbl.textContent = 'Error';
     });
 }
 
-function getFallbackTrends() {
-  return [
-    { name:'FIFA World Cup 2026 host cities guide',    vol:'500K+', badge:'breakout', pct:'+1,000%', started:'2h ago' },
-    { name:'World Cup 2026 group stage draw results',  vol:'200K+', badge:'breakout', pct:'+1,000%', started:'4h ago' },
-    { name:'Messi World Cup 2026 Argentina squad',     vol:'200K+', badge:'breakout', pct:'+1,000%', started:'3h ago' },
-    { name:'World Cup 2026 schedule fixtures dates',   vol:'200K+', badge:'hot',      pct:'+800%',   started:'6h ago' },
-    { name:'USA World Cup 2026 squad roster',          vol:'100K+', badge:'hot',      pct:'+650%',   started:'5h ago' },
-    { name:'World Cup 2026 tickets how to buy',        vol:'100K+', badge:'hot',      pct:'+500%',   started:'11h ago' },
-    { name:'England World Cup 2026 squad news',        vol:'100K+', badge:'hot',      pct:'+450%',   started:'8h ago' },
-    { name:'Brazil World Cup 2026 lineup prediction',  vol:'100K+', badge:'hot',      pct:'+600%',   started:'7h ago' },
-    { name:'France World Cup 2026 team preview',       vol:'100K+', badge:'rising',   pct:'+400%',   started:'9h ago' },
-    { name:'World Cup 2026 bracket predictions',       vol:'50K+',  badge:'rising',   pct:'+400%',   started:'13h ago' },
-    { name:'World Cup 2026 best football boots',       vol:'50K+',  badge:'rising',   pct:'+300%',   started:'16h ago' },
-    { name:'Topps Chrome World Cup 2026 cards',        vol:'50K+',  badge:'rising',   pct:'+500%',   started:'14h ago' }
-  ];
+function selectTrend(el, name) {
+  document.querySelectorAll('.trend-item').forEach(function(i) { i.classList.remove('selected'); });
+  el.classList.add('selected');
+  setTopic(name);
 }
 
-function selectTrend(t, i) {
-  document.querySelectorAll('.trend-item').forEach(function(el) { el.classList.remove('selected'); });
-  var el = document.getElementById('tr-' + i);
-  if (el) el.classList.add('selected');
-  state.topic = t.name;
-  document.getElementById('selected-display').textContent = t.name + ' — ' + t.vol + ' · ' + t.pct;
-  document.getElementById('selected-display').style.color = '#E8FF00';
-  var btn = document.getElementById('btn-go-gen');
-  btn.disabled = false; btn.style.opacity = '1';
-  document.getElementById('gen-topic').textContent = t.name;
-  updateReadTime();
+function setTopic(name) {
+  state.topic = name;
+  var disp = document.getElementById('selected-display');
+  disp.textContent = name;
+  disp.className = 'selected-topic';
+  document.getElementById('btn-go-research').disabled = false;
+  document.getElementById('btn-skip-to-gen').disabled = false;
+  document.getElementById('gen-topic-label').textContent = 'Topic: ' + name;
+  updateReadtime();
+  notify('Topic selected: ' + name.slice(0, 60));
 }
 
 function useCustomKw() {
   var kw = document.getElementById('custom-kw').value.trim();
   if (!kw) return;
-  state.topic = kw;
-  document.getElementById('selected-display').textContent = kw + ' — custom keyword';
-  document.getElementById('selected-display').style.color = '#E8FF00';
-  var btn = document.getElementById('btn-go-gen');
-  btn.disabled = false; btn.style.opacity = '1';
-  document.getElementById('gen-topic').textContent = kw;
-  updateReadTime();
-  switchTab('generate');
+  setTopic(kw);
+}
+
+function goResearch() {
+  if (!state.topic) { notify('Select a topic first', 'error'); return; }
+  switchStage(2);
+  runSerp();
 }
 
 function loadKwSuggestions() {
-  var c = document.getElementById('kw-suggestions');
-  KW_IDEAS.forEach(function(kw) {
-    var t = document.createElement('span');
-    t.className = 'kw-tag';
-    t.textContent = kw;
-    t.onclick = function() {
-      document.getElementById('custom-kw').value = kw;
-      document.querySelectorAll('.kw-tag').forEach(function(el) { el.classList.remove('sel'); });
-      t.classList.add('sel');
-    };
-    c.appendChild(t);
-  });
+  var ideas = [
+    'World Cup 2026 host cities complete guide',
+    'England vs USA World Cup 2026 preview',
+    'World Cup 2026 group stage predictions',
+    'Best World Cup 2026 kits ranked',
+    'Messi final World Cup 2026 legacy',
+    'World Cup 2026 tickets prices guide',
+    'Top scorers World Cup 2026 predictions',
+    'World Cup 2026 dark horse teams'
+  ];
+  document.getElementById('kw-suggestions').innerHTML = ideas.map(function(kw) {
+    return '<div class="related-tag" onclick="document.getElementById(\'custom-kw\').value=\'' + escJs(kw) + '\'">' + kw + '</div>';
+  }).join('');
 }
 
-function updateReadTime() {
-  var wc = parseInt(document.getElementById('word-count').value) || 1600;
-  document.getElementById('gen-readtime').textContent = Math.round(wc / 230) + ' min read';
+// ═══════════════════════════════════════════════════════
+// STAGE 2 — SERP RESEARCH
+// ═══════════════════════════════════════════════════════
+function runSerp() {
+  if (!state.topic) { notify('Select a topic first', 'error'); return; }
+  var body = document.getElementById('serp-main-body');
+  body.innerHTML = '<div class="loading-row"><div class="spinner"></div>Analysing SERP for: ' + escHtml(state.topic) + '</div>';
+
+  fetch(PROXY + '/serp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ keyword: state.topic })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      serpCache = d;
+      body.innerHTML = renderSerpHtml(d);
+      markStageDone(2);
+    })
+    .catch(function(e) {
+      body.innerHTML = '<div style="padding:16px;color:var(--red);font-family:var(--f-m);font-size:11px">SERP failed: ' + e.message + '</div>';
+    });
 }
+
+function renderSerpHtml(d) {
+  var html = '<div style="font-family:var(--f-m);font-size:9px;color:var(--mg);margin-bottom:10px">Source: '
+    + (d.source || 'unknown') + ' &mdash; ' + (d.total || 0) + ' results for: <strong style="color:var(--lg)">' + escHtml(d.keyword || state.topic) + '</strong></div>';
+
+  if (d.paa && d.paa.length) {
+    html += '<div class="serp-section-title">People Also Ask (' + d.paa.length + ')</div>';
+    html += d.paa.map(function(p) {
+      return '<div class="paa-item"><div class="paa-q">' + escHtml(p.q) + '</div>'
+        + (p.a ? '<div class="paa-a">' + escHtml(p.a.slice(0, 250)) + '</div>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  if (d.results && d.results.length) {
+    html += '<div class="serp-section-title">Top Ranking Pages</div>';
+    html += d.results.map(function(r, i) {
+      return '<div class="serp-result">'
+        + '<div class="serp-result-title">' + (i + 1) + '. ' + escHtml(r.title) + '</div>'
+        + '<div class="serp-result-url">' + escHtml((r.url || '').slice(0, 90)) + '</div>'
+        + '<div class="serp-result-desc">' + escHtml((r.description || '').slice(0, 200)) + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  if (d.related && d.related.length) {
+    html += '<div class="serp-section-title">Related Searches</div>';
+    html += '<div class="related-tags">'
+      + d.related.map(function(s) { return '<div class="related-tag">' + escHtml(s) + '</div>'; }).join('')
+      + '</div>';
+  }
+
+  return html;
+}
+
+function showSerpInline() {
+  var panel = document.getElementById('serp-inline');
+  var body  = document.getElementById('serp-inline-body');
+  var kw    = document.getElementById('serp-kw-show');
+  kw.textContent = state.topic;
+  panel.style.display = 'block';
+
+  if (serpCache) { body.innerHTML = renderSerpHtml(serpCache); return; }
+
+  body.innerHTML = '<div class="loading-row"><div class="spinner"></div>Running SERP...</div>';
+  fetch(PROXY + '/serp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ keyword: state.topic })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { serpCache = d; body.innerHTML = renderSerpHtml(d); })
+    .catch(function(e) { body.innerHTML = '<div style="color:var(--red);font-family:var(--f-m);font-size:11px">Failed: ' + e.message + '</div>'; });
+}
+
+// ═══════════════════════════════════════════════════════
+// STAGE 3 — GENERATE
+// ═══════════════════════════════════════════════════════
+var selectedArtType = 'news';
+function selectType(el) {
+  document.querySelectorAll('.art-pill').forEach(function(p) { p.classList.remove('active'); });
+  el.classList.add('active');
+  selectedArtType = el.dataset.type;
+}
+
+function updateReadtime() {
+  var wc = parseInt(document.getElementById('word-count').value) || 1600;
+  var mins = Math.ceil(wc / 238);
+  var el = document.getElementById('gen-readtime');
+  if (el) el.textContent = mins + ' min read · ~' + wc + ' words';
+}
+
+document.getElementById('word-count').addEventListener('change', updateReadtime);
 
 async function generateArticle() {
-  if (!state.topic) { alert('Please select a topic first.'); switchTab('trends'); return; }
-  var proxyUrl = document.getElementById('proxy-url') ? document.getElementById('proxy-url').value.trim() : PROXY;
-  PROXY = proxyUrl;
+  if (!state.topic) { notify('No topic selected', 'error'); return; }
+  switchStage(3);
 
-  var artType  = document.getElementById('art-type').value;
-  var wordCount = document.getElementById('word-count').value;
-  var affType  = document.getElementById('aff-type').value;
-  var audience = document.getElementById('audience').value;
-  var tone     = document.getElementById('tone').value;
-  var pubName  = document.getElementById('pub-name').value || 'BestSportsMag';
-  var author   = document.getElementById('pub-author').value || 'BSM Editorial Staff';
+  var btn    = document.getElementById('btn-gen');
+  var status = document.getElementById('gen-status');
+  var stxt   = document.getElementById('gen-status-text');
+  var prog   = document.getElementById('gen-progress');
 
-  var systemPrompt = 'You are an expert football journalist and SEO specialist writing for ' + pubName + ', a global sports magazine. Follow Google E-E-A-T guidelines. Be authoritative, specific, and never use filler phrases. Target: ' + AUD_MAP[audience] + '. Tone: ' + tone + '.';
+  btn.disabled = true;
+  status.style.display = 'block';
 
-  var userPrompt = 'Write a complete ' + wordCount + '-word SEO article about: "' + state.topic + '"\n\n' +
-    'OUTPUT FORMAT — use exactly this structure:\n\n' +
-    'TITLE: [SEO title under 60 characters, keyword first]\n\n' +
-    'SLUG: [URL slug, lowercase hyphens, max 6 words, no dates]\n\n' +
-    'META: [Meta description exactly 150-155 characters, keyword + benefit + soft CTA]\n\n' +
-    'CONTENT:\n' +
-    '[Opening hook paragraph — no heading. Then 4-5 ## H2 sections. End with ## Frequently Asked Questions with exactly 3 Q&A pairs using **Q:** and **A:** format.]\n\n' +
-    'SEO RULES:\n' +
-    '- Keyword in: first 100 words, 2+ H2 headings, naturally throughout\n' +
-    '- One H2 must be a question for People Also Ask targeting\n' +
-    '- World Cup 2026 facts: June 11–July 19 2026, USA/Canada/Mexico hosts, 48 teams, 104 matches, 16 venues\n' +
-    '- Internal links: use [INTERNAL: related topic] placeholder exactly 2 times\n' +
-    '- ' + AFF_MAP[affType] + '\n' +
-    '- Article type: ' + TYPE_MAP[artType] + '\n' +
-    '- Strong conclusion paragraph\n' +
-    '- Credit: By ' + author;
+  var steps = [
+    [10, 'Fetching live search context...'],
+    [25, 'Pulling PAA questions from SerpAPI...'],
+    [45, 'Building enriched system prompt...'],
+    [65, 'Claude is writing your article...'],
+    [85, 'Parsing and styling HTML...'],
+    [95, 'Almost done...']
+  ];
 
-  document.getElementById('gen-loading').style.display = 'block';
-  document.getElementById('article-section').style.display = 'none';
-  document.getElementById('btn-gen').disabled = true;
+  var stepIdx = 0;
+  var progInterval = setInterval(function() {
+    if (stepIdx < steps.length) {
+      prog.style.width = steps[stepIdx][0] + '%';
+      stxt.textContent = steps[stepIdx][1];
+      stepIdx++;
+    }
+  }, 3000);
+
+  var wc      = document.getElementById('word-count').value;
+  var affType = document.getElementById('aff-type').value;
+  var aud     = document.getElementById('audience').value;
+  var tone    = document.getElementById('tone').value;
+  var pubName = document.getElementById('pub-name').value || 'BestSportsMag';
+  var author  = document.getElementById('pub-author').value || 'BSM Editorial Staff';
+
+  var affGuide = {
+    gear:    'Include 2-3 [AFFILIATE: Product Name — $Price — Brand — via Impact.com] placeholders for Adidas, Nike, Puma football gear.',
+    cards:   'Include 2-3 [AFFILIATE: Product Name — $Price — Topps/Panini — via Impact.com] placeholders for collectibles.',
+    amazon:  'Include 2-3 [AMAZON: Product Name — $Price] placeholders for relevant Amazon products.',
+    none:    'No affiliate link placeholders needed.'
+  }[affType] || '';
+
+  var toneGuide = {
+    editorial:     'Write fast, punchy editorial prose. Short paragraphs. Strong lede. No filler.',
+    analytical:    'Data-driven, cite numbers and context. Structured analysis.',
+    conversational:'Fan-focused, passionate voice. Write like a knowledgeable supporter.'
+  }[tone] || '';
+
+  var typeGuide = {
+    news:     'Breaking news format: 5Ws in first paragraph, context in middle, reaction/quote section, outlook.',
+    preview:  'Match preview: team form, key players, head-to-head, predicted lineups, score prediction.',
+    guide:    'Complete guide format: introduction, main sections as H2, practical tips, FAQ.',
+    analysis: 'Deep analysis: tactical breakdown, statistical context, expert observations.',
+    listicle: 'Numbered best-of list: intro, numbered items with subheadings, comparison, verdict.',
+    review:   'Product review: overview, performance, value, pros/cons, verdict with affiliate CTA.'
+  }[selectedArtType] || '';
+
+  var prompt = 'Write a complete ' + wc + '-word SEO article about: "' + state.topic + '"\n\n'
+    + 'ARTICLE TYPE: ' + (selectedArtType) + ' — ' + typeGuide + '\n'
+    + 'TARGET AUDIENCE: ' + aud + ' sports fans\n'
+    + 'TONE: ' + toneGuide + '\n'
+    + 'PUBLICATION: ' + pubName + ' (bestsportsmag.com)\n'
+    + 'AUTHOR: ' + author + '\n\n'
+    + 'AFFILIATE: ' + affGuide + '\n\n'
+    + 'OUTPUT FORMAT (REQUIRED):\n\n'
+    + 'TITLE: [Under 60 chars, keyword first, compelling]\n\n'
+    + 'SLUG: [lowercase-hyphenated, max 7 words]\n\n'
+    + 'META: [Exactly 150-155 chars, keyword + benefit + CTA]\n\n'
+    + 'TAGS: [8 relevant tags, comma-separated]\n\n'
+    + 'CONTENT:\n'
+    + '[Write ' + wc + ' words minimum. Opening paragraph must include keyword in first 100 words.]\n\n'
+    + '## [H2 with keyword variation]\n'
+    + '[3 paragraphs minimum per H2 section]\n\n'
+    + '## [H2 — contextual section]\n'
+    + '[3 paragraphs]\n\n'
+    + '## [H2 — expert analysis or guide section]\n'
+    + '[3 paragraphs]\n\n'
+    + '## What to Expect Next\n'
+    + '[2 paragraphs — outlook and future context]\n\n'
+    + '## Frequently Asked Questions\n'
+    + 'USE THE PEOPLE ALSO ASK QUESTIONS from the system context below. Write 4-6 FAQs minimum.\n'
+    + '**Q:** [Question from PAA or common reader question]?\n'
+    + '**A:** [3-4 sentence direct answer]\n\n'
+    + '(repeat for each FAQ)\n\n'
+    + 'SEO RULES:\n'
+    + '- Keyword in title, first 100 words, 2+ H2 headings\n'
+    + '- 4-6 FAQ items using real PAA questions from the context\n'
+    + '- 2 internal links: [INTERNAL: related article topic]\n'
+    + affGuide;
 
   try {
-    var resp = await fetch(PROXY + '/generate', {
+    var r = await fetch(PROXY + '/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system: systemPrompt, prompt: userPrompt, model: 'claude-sonnet-4-20250514', max_tokens: 4000 })
+      body: JSON.stringify({ prompt, model:'claude-sonnet-4-20250514', max_tokens:8000, articleType:selectedArtType })
     });
+    var d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Generate failed');
 
-    var data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'Proxy error ' + resp.status);
+    clearInterval(progInterval);
+    prog.style.width = '100%';
+    stxt.textContent = 'Done!';
 
-    // v2: proxy returns bsm object with pre-styled HTML
-    if (data.bsm) {
-      state.title      = data.bsm.title;
-      state.slug       = data.bsm.slug;
-      state.meta       = data.bsm.meta;
-      state.content    = data.bsm.raw;
-      state.styledHtml = data.bsm.html;
-    } else {
-      // Fallback for old proxy
-      var text = data.content[0].text;
-      var titleM = text.match(/TITLE:\s*(.+?)(?:\n|$)/);
-      var slugM  = text.match(/SLUG:\s*(.+?)(?:\n|$)/);
-      var metaM  = text.match(/META:\s*(.+?)(?:\n|$)/);
-      var contM  = text.match(/CONTENT:\s*([\s\S]+)/);
-      state.title   = titleM ? titleM[1].trim() : state.topic;
-      state.slug    = slugM  ? slugM[1].trim() : state.topic.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').slice(0,60);
-      state.meta    = metaM  ? metaM[1].trim() : '';
-      state.content = contM  ? contM[1].trim() : text;
-      state.styledHtml = '<p>' + state.content.replace(/\n\n/g,'</p><p>') + '</p>';
+    var bsm = d.bsm || {};
+    state.title   = cleanField(bsm.title || '');
+    state.slug    = cleanSlug(bsm.slug || '');
+    state.meta    = cleanField(bsm.meta || '');
+    state.content = bsm.raw || '';
+    state.html    = bsm.html || '';
+    state.tags    = bsm.tags || [];
+    state.faq     = bsm.faq || [];
+
+    // Fallback slug from title
+    if (!state.slug || state.slug.length < 3) {
+      state.slug = cleanSlug(state.title);
     }
-
-    document.getElementById('out-title').textContent   = state.title;
-    document.getElementById('out-slug').textContent    = state.slug;
-    document.getElementById('out-meta').textContent    = state.meta;
-    document.getElementById('out-content').textContent = state.content;
-    document.getElementById('out-html').textContent    = state.styledHtml.substring(0, 800) + '...';
 
     state.genCount++;
-    state.cost += 0.30;
-    document.getElementById('st-gen').textContent    = state.genCount;
-    document.getElementById('st-needed').textContent = Math.max(0, 48 - state.genCount);
-    document.getElementById('sess-gen').textContent  = state.genCount;
+    state.cost += 0.085;
+    document.getElementById('st-gen').textContent = state.genCount;
+    document.getElementById('st-cost').textContent = '$' + state.cost.toFixed(2);
+    document.getElementById('st-remain').textContent = Math.max(0, 48 - state.genCount);
+    document.getElementById('sess-gen').textContent = state.genCount;
     document.getElementById('sess-cost').textContent = '$' + state.cost.toFixed(2);
-    document.getElementById('article-section').style.display = 'block';
-    document.getElementById('btn-pub').disabled = false;
-    document.getElementById('btn-pub').style.opacity = '1';
+
+    markStageDone(3);
+    switchStage(4);
+    populateEditPanel();
+    notify('Article generated. Review and edit before publishing.', 'success');
 
   } catch(e) {
-    var msg = e.message || 'Unknown error';
-    if (msg.includes('fetch') || msg.includes('Network')) {
-      alert('Proxy server is waking up. Wait 50 seconds and try again.');
-    } else {
-      alert('Error: ' + msg);
-    }
+    clearInterval(progInterval);
+    stxt.textContent = 'Error: ' + e.message;
+    prog.style.width = '0';
+    notify('Generation failed: ' + e.message, 'error');
   } finally {
-    document.getElementById('gen-loading').style.display = 'none';
-    document.getElementById('btn-gen').disabled = false;
+    btn.disabled = false;
+    setTimeout(function() { status.style.display = 'none'; prog.style.width = '0'; }, 3000);
   }
 }
 
-function copyField(id) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  navigator.clipboard.writeText(el.textContent).then(function() {
-    var orig = el.style.borderColor;
-    el.style.borderColor = '#E8FF00';
-    setTimeout(function() { el.style.borderColor = orig; }, 800);
-  });
+// ═══════════════════════════════════════════════════════
+// STAGE 4 — EDIT
+// ═══════════════════════════════════════════════════════
+function populateEditPanel() {
+  document.getElementById('out-title-input').value = state.title;
+  document.getElementById('out-slug-input').value  = state.slug;
+  document.getElementById('out-meta-input').value  = state.meta;
+  document.getElementById('out-body-input').value  = state.content;
+  updateCharCount();
+  livePreview();
 }
 
-function copyRaw() {
-  var full = 'TITLE: ' + state.title + '\n\nSLUG: ' + state.slug + '\n\nMETA: ' + state.meta + '\n\nCONTENT:\n\n' + state.content;
-  navigator.clipboard.writeText(full).then(function() { alert('Raw article copied to clipboard.'); });
+function syncSlug(val) {
+  state.slug = val.toLowerCase().replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');
+  document.getElementById('out-slug-input').value = state.slug;
+}
+
+function updateCharCount() {
+  var meta = document.getElementById('out-meta-input').value;
+  state.meta = meta;
+  var cnt = document.getElementById('meta-chars');
+  if (cnt) { cnt.textContent = meta.length; cnt.style.color = meta.length > 155 ? 'var(--red)' : 'var(--mg)'; }
+}
+
+function livePreview() {
+  var content = state.content || '';
+  var preview = content
+    .replace(/## (.+)/g, '<h2 style="font-family:sans-serif;font-size:13px;font-weight:700;color:#e8e8e8;margin:14px 0 6px;text-transform:uppercase">$1</h2>')
+    .replace(/### (.+)/g, '<h3 style="font-size:12px;font-weight:700;color:#ccc;margin:10px 0 4px">$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff">$1</strong>')
+    .replace(/\n\n/g, '</p><p style="font-size:11px;line-height:1.7;color:#aaa;margin:0 0 10px">')
+    .replace(/\n/g, '<br>');
+  document.getElementById('out-html-preview').innerHTML =
+    '<p style="font-size:11px;line-height:1.7;color:#aaa;margin:0 0 10px">' + preview + '</p>';
+}
+
+function copyHtml() {
+  navigator.clipboard.writeText(state.html || '').then(function() { notify('HTML copied to clipboard', 'success'); });
+}
+
+function copyAll() {
+  var all = 'TITLE: ' + state.title + '\nSLUG: ' + state.slug + '\nMETA: ' + state.meta
+    + '\n\nTAGS: ' + state.tags.join(', ') + '\n\nCONTENT:\n' + state.content;
+  navigator.clipboard.writeText(all).then(function() { notify('All fields copied', 'success'); });
+}
+
+// ═══════════════════════════════════════════════════════
+// STAGE 5 — PUBLISH
+// ═══════════════════════════════════════════════════════
+function updatePublishPreview() {
+  var words = state.content ? state.content.split(/\s+/).length : 0;
+  document.getElementById('pub-title-preview').textContent = state.title || '—';
+  document.getElementById('pub-slug-preview').textContent  = state.slug  || '—';
+  document.getElementById('pub-words').textContent  = words + ' words';
+  document.getElementById('pub-faqs').textContent   = (state.faq || []).length + ' items';
+  document.getElementById('pub-status').textContent = 'Ready to publish';
+  document.getElementById('pub-status').style.color = 'var(--lime)';
 }
 
 async function testWP() {
   var url  = document.getElementById('wp-url').value.trim().replace(/\/$/,'');
   var user = document.getElementById('wp-user').value.trim();
   var pass = document.getElementById('wp-pass').value.trim();
-  if (!url || !user || !pass) { alert('Fill in all WordPress fields.'); return; }
-  var status = document.getElementById('wp-status');
-  status.innerHTML = '<div class="loading"><div class="spinner"></div>Testing...</div>';
+  var res  = document.getElementById('wp-test-result');
+  res.innerHTML = '<div class="wp-info">Testing...</div>';
   try {
-    var r = await fetch(url + '/wp-json/wp/v2/users/me', { headers: { 'Authorization': 'Basic ' + btoa(user + ':' + pass) } });
+    var r = await fetch(url + '/wp-json/wp/v2/users/me', {
+      headers: { 'Authorization': 'Basic ' + btoa(user + ':' + pass) }
+    });
     if (r.ok) {
       var d = await r.json();
-      status.innerHTML = '<div class="success">✅ Connected as: <strong>' + d.name + '</strong></div>';
-      document.getElementById('btn-pub').disabled = false;
-      document.getElementById('btn-pub').style.opacity = '1';
+      res.innerHTML = '<div class="wp-success">Connected as: ' + escHtml(d.name || user) + '</div>';
     } else {
-      status.innerHTML = '<div class="error">❌ Failed (' + r.status + ') — check credentials</div>';
+      res.innerHTML = '<div class="wp-error">Auth failed (' + r.status + ') — check username and password</div>';
     }
   } catch(e) {
-    status.innerHTML = '<div class="error">❌ Cannot reach WordPress — check URL</div>';
+    res.innerHTML = '<div class="wp-error">Cannot reach WordPress: ' + e.message + '</div>';
   }
 }
 
 async function publishWP() {
-  if (!state.styledHtml) { alert('Generate an article first.'); switchTab('generate'); return; }
+  if (!state.title || !state.html) { notify('No article to publish — generate one first', 'error'); return; }
   var url  = document.getElementById('wp-url').value.trim().replace(/\/$/,'');
   var user = document.getElementById('wp-user').value.trim();
   var pass = document.getElementById('wp-pass').value.trim();
   var cat  = parseInt(document.getElementById('wp-cat').value) || null;
-  if (!url || !user || !pass) { alert('Fill in WordPress credentials.'); return; }
+  var res  = document.getElementById('pub-result');
 
-  var status = document.getElementById('wp-status');
-  status.innerHTML = '<div class="loading"><div class="spinner"></div>Publishing BSM-styled article...</div>';
-  document.getElementById('btn-pub').disabled = true;
+  if (!url || !user || !pass) { notify('Fill in WordPress credentials first', 'error'); return; }
+
+  var btn = document.getElementById('btn-publish');
+  btn.disabled = true;
+  btn.textContent = 'Publishing...';
+  res.innerHTML = '<div class="wp-info">Sending to WordPress...</div>';
+
+  var title = cleanField(state.title);
+  var slug  = cleanSlug(state.slug || state.title);
 
   try {
-    var body = { title: state.title, content: state.styledHtml, slug: state.slug, excerpt: state.meta, status: 'publish' };
+    var body = {
+      title:          title,
+      content:        state.html,
+      slug:           slug,
+      excerpt:        cleanField(state.meta),
+      status:         'publish',
+      comment_status: 'open',
+      ping_status:    'closed'
+    };
     if (cat) body.categories = [cat];
+    if (state.tags && state.tags.length) {
+      // Tags as comma-separated for WP
+      body.tags_input = state.tags.join(',');
+    }
 
     var r = await fetch(url + '/wp-json/wp/v2/posts', {
       method: 'POST',
       headers: { 'Authorization': 'Basic ' + btoa(user + ':' + pass), 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
+    var d = await r.json();
 
     if (r.ok) {
-      var d = await r.json();
       state.pubCount++;
-      document.getElementById('st-pub').textContent    = state.pubCount;
-      document.getElementById('sess-pub').textContent  = state.pubCount;
-      status.innerHTML = '<div class="success">✅ Published with BSM styling! <a href="' + d.link + '" target="_blank">View post →</a><br><small style="color:#00aa00">Set featured image in WordPress to complete the article.</small></div>';
+      document.getElementById('st-pub').textContent  = state.pubCount;
+      document.getElementById('sess-pub').textContent = state.pubCount;
+      markStageDone(4);
+      markStageDone(5);
+      res.innerHTML = '<div class="wp-success">Published! <a href="' + (d.link || '#') + '" target="_blank" style="color:var(--lime)">'
+        + escHtml(title) + ' &rarr;</a></div>';
+      notify('Published: ' + title.slice(0, 60), 'success');
+      document.getElementById('pub-status').textContent = 'Published';
+      document.getElementById('pub-status').style.color = 'var(--green)';
     } else {
-      var err = await r.json();
-      status.innerHTML = '<div class="error">❌ ' + (err.message || 'Error ' + r.status) + '</div>';
+      var errMsg = d.message || d.code || r.status;
+      res.innerHTML = '<div class="wp-error">Failed: ' + escHtml(errMsg) + '</div>';
+      notify('Publish failed: ' + errMsg, 'error');
     }
   } catch(e) {
-    status.innerHTML = '<div class="error">❌ ' + e.message + '</div>';
+    res.innerHTML = '<div class="wp-error">Error: ' + e.message + '</div>';
+    notify('Publish error: ' + e.message, 'error');
   } finally {
-    document.getElementById('btn-pub').disabled = false;
-    document.getElementById('btn-pub').style.opacity = '1';
+    btn.disabled = false;
+    btn.textContent = 'Publish Live Now';
   }
 }
 
-function resetSession() {
-  state = { topic:null, title:'', slug:'', meta:'', content:'', styledHtml:'', genCount:0, pubCount:0, cost:0 };
-  document.getElementById('st-gen').textContent = '0';
-  document.getElementById('st-pub').textContent = '0';
-  document.getElementById('st-needed').textContent = '48';
-  document.getElementById('sess-gen').textContent = '0';
-  document.getElementById('sess-pub').textContent = '0';
-  document.getElementById('sess-cost').textContent = '$0.00';
-  document.getElementById('article-section').style.display = 'none';
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function cleanField(str) {
+  return (str || '').replace(/\*\*/g,'').replace(/^[\[#\s]+|[\]\s]+$/g,'').trim();
 }
+
+function cleanSlug(str) {
+  return (str || '').toLowerCase()
+    .replace(/\*\*/g,'').replace(/^[\[#\s\/]+|[\]\s\/]+$/g,'')
+    .replace(/[^a-z0-9\s-]/g,'').trim()
+    .replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')
+    .slice(0, 80);
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escJs(str) {
+  return (str || '').replace(/'/g,"\\'").replace(/"/g,'\\"');
+}
+
+function notify(msg, type) {
+  var n = document.getElementById('notif');
+  n.textContent = msg;
+  n.className = 'notif show' + (type ? ' ' + type : '');
+  clearTimeout(n._t);
+  n._t = setTimeout(function() { n.className = 'notif'; }, 3500);
+}
+
+// Init readtime
+updateReadtime();
 </script>
 </body>
 </html>
