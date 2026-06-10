@@ -406,6 +406,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
   </div>
 
   <div class="card">
+    <div class="card-head"><div class="card-title">Reference URLs <span style="font-family:var(--f-m);font-size:9px;color:var(--mg);font-weight:400;text-transform:none;letter-spacing:0">(optional — paste up to 5 source URLs)</span></div></div>
+    <div class="card-body">
+      <div style="display:flex;flex-direction:column;gap:6px" id="ref-url-fields">
+        <input type="url" class="ref-url" placeholder="https://example.com/article-1" style="font-family:var(--f-m);font-size:11px">
+        <input type="url" class="ref-url" placeholder="https://example.com/article-2" style="font-family:var(--f-m);font-size:11px">
+        <input type="url" class="ref-url" placeholder="https://example.com/article-3" style="font-family:var(--f-m);font-size:11px">
+        <input type="url" class="ref-url" placeholder="https://example.com/article-4" style="font-family:var(--f-m);font-size:11px">
+        <input type="url" class="ref-url" placeholder="https://example.com/article-5" style="font-family:var(--f-m);font-size:11px">
+      </div>
+      <div id="ref-status" style="font-family:var(--f-m);font-size:10px;color:var(--mg);margin-top:8px;min-height:16px"></div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-head">
       <div class="card-title" id="gen-topic-label">Topic: None selected</div>
       <div style="font-family:var(--f-m);font-size:9px;color:var(--mg)" id="gen-readtime"></div>
@@ -880,10 +894,11 @@ async function generateArticle() {
   status.style.display = 'block';
 
   var steps = [
-    [10, 'Fetching live search context...'],
-    [25, 'Pulling PAA questions from SerpAPI...'],
-    [45, 'Building enriched system prompt...'],
-    [65, 'Claude is writing your article...'],
+    [8,  'Reading reference URLs...'],
+    [20, 'Fetching reference content...'],
+    [35, 'Building SERP context...'],
+    [50, 'Building enriched system prompt...'],
+    [68, 'Claude is writing your article...'],
     [85, 'Parsing and styling HTML...'],
     [95, 'Almost done...']
   ];
@@ -896,6 +911,36 @@ async function generateArticle() {
       stepIdx++;
     }
   }, 3000);
+
+  // ── Step 1: Collect reference URLs ──
+  var refUrls = Array.from(document.querySelectorAll('.ref-url'))
+    .map(function(inp) { return inp.value.trim(); })
+    .filter(function(u) { return u && (u.startsWith('http://') || u.startsWith('https://')); });
+
+  var refContent = [];
+  var refStatusEl = document.getElementById('ref-status');
+
+  if (refUrls.length > 0) {
+    if (refStatusEl) refStatusEl.textContent = 'Fetching ' + refUrls.length + ' reference URL(s)...';
+    prog.style.width = '12%';
+    stxt.textContent = 'Fetching ' + refUrls.length + ' reference URL(s)...';
+    try {
+      var refResp = await fetch(getProxy() + '/fetch-refs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urls: refUrls })
+      });
+      var refData = await refResp.json();
+      refContent = refData.results || [];
+      var successCount = refData.successful || 0;
+      if (refStatusEl) refStatusEl.textContent = successCount + ' of ' + refUrls.length + ' URLs fetched successfully';
+      if (successCount > 0) notify(successCount + ' reference URL(s) loaded', 'success');
+    } catch(e) {
+      if (refStatusEl) refStatusEl.textContent = 'URL fetch failed: ' + e.message;
+    }
+  } else {
+    if (refStatusEl) refStatusEl.textContent = '';
+  }
 
   var wc      = document.getElementById('word-count').value;
   var affType = document.getElementById('aff-type').value;
@@ -963,7 +1008,14 @@ async function generateArticle() {
     var r = await fetch(PROXY + '/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, model:'claude-sonnet-4-20250514', max_tokens:8000, articleType:selectedArtType })
+      body: JSON.stringify({
+        prompt,
+        model:       'claude-sonnet-4-20250514',
+        max_tokens:  8000,
+        articleType: selectedArtType,
+        serpData:    serpCache || null,
+        refContent:  refContent.length > 0 ? refContent : null
+      })
     });
     var d = await r.json();
     if (!r.ok) throw new Error(d.error || 'Generate failed');
