@@ -293,6 +293,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
         <div class="loading-row"><div class="spinner"></div>Loading live trends...</div>
       </div>
     </div>
+    <div id="trends-warn" style="display:none;background:#1a0000;border:1px solid #440000;border-top:none;color:#ff9999;font-family:var(--f-m);font-size:10px;padding:8px 12px"></div>
     <div class="source-bar">
       <span id="trends-source-label" class="source-label">Fetching...</span>
       <span id="trends-time" style="font-family:var(--f-m);font-size:9px;color:var(--dg)"></span>
@@ -714,7 +715,15 @@ function loadTrends() {
       srcLbl.textContent = d.source || 'unknown';
       timeLbl.textContent = new Date().toLocaleTimeString();
 
-      var warn = document.getElementById('trends-warn-msg');
+      var warn = document.getElementById('trends-warn');
+      if (warn) {
+        if (d.source === 'fallback') {
+          warn.style.display = 'block';
+          warn.textContent = 'Live trends unavailable' + (d.lastError ? ' — ' + d.lastError : '') + ' — showing curated fallback topics';
+        } else {
+          warn.style.display = 'none';
+        }
+      }
 
       if (!d.trends || !d.trends.length) {
         list.innerHTML = '<div style="padding:16px;font-family:var(--f-m);font-size:11px;color:var(--mg)">No trends returned. Try refreshing.</div>';
@@ -925,7 +934,7 @@ async function generateArticle() {
     prog.style.width = '12%';
     stxt.textContent = 'Fetching ' + refUrls.length + ' reference URL(s)...';
     try {
-      var refResp = await fetch(getProxy() + '/fetch-refs', {
+      var refResp = await fetch(PROXY + '/fetch-refs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ urls: refUrls })
@@ -994,13 +1003,13 @@ async function generateArticle() {
     + '## What to Expect Next\n'
     + '[2 paragraphs — outlook and future context]\n\n'
     + '## Frequently Asked Questions\n'
-    + 'USE THE PEOPLE ALSO ASK QUESTIONS from the system context below. Write 4-6 FAQs minimum.\n'
+    + 'USE THE PEOPLE ALSO ASK QUESTIONS from the system context below. Write 4-7 FAQs minimum.\n'
     + '**Q:** [Question from PAA or common reader question]?\n'
     + '**A:** [3-4 sentence direct answer]\n\n'
     + '(repeat for each FAQ)\n\n'
     + 'SEO RULES:\n'
     + '- Keyword in title, first 100 words, 2+ H2 headings\n'
-    + '- 4-6 FAQ items using real PAA questions from the context\n'
+    + '- 4-7 FAQ items using real PAA questions from the context\n'
     + '- 2 internal links: [INTERNAL: related article topic]\n'
     + affGuide;
 
