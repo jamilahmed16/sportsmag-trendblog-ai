@@ -230,7 +230,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
 <!-- TOP BAR -->
 <nav class="topbar">
   <div class="topbar-logo">Best<span>Sports</span>Mag</div>
-  <div class="topbar-tool">TrendBlog AI v6 &mdash; World Cup 2026</div>
+  <div class="topbar-tool">TrendBlog AI v6.1 &mdash; World Cup 2026</div>
   <div class="topbar-right">
     <div class="proxy-pill">
       <div class="proxy-dot checking" id="proxy-dot"></div>
@@ -527,28 +527,29 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
       <div style="display:flex;gap:6px">
         <button class="btn btn-ghost btn-sm" onclick="generateArticle()">Regenerate</button>
         <button class="btn btn-ghost btn-sm" onclick="showSerpInline()">SERP Analysis</button>
-        <button class="btn btn-ghost btn-sm" onclick="runQaCheck()" style="border-color:rgba(0,180,255,.4);color:var(--blue)">QA Check</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchStage(4)" style="border-color:rgba(0,180,255,.4);color:var(--blue)">Optimize Scores</button>
         <button class="btn btn-lime btn-sm" onclick="switchStage(6)">Looks Good &rarr; Publish</button>
       </div>
     </div>
+    <div id="live-score-strip" style="display:flex;align-items:center;gap:20px;padding:10px 16px;background:var(--black);border-bottom:1px solid var(--dg);"></div>
     <div class="card-body">
 
       <!-- SEO Title -->
       <div class="edit-field-title">SEO Title <span class="edit-hint">Edit freely — this becomes your H1 and page title</span></div>
-      <input type="text" id="out-title-input" placeholder="Article title here..." oninput="state.title=this.value;markDirty()">
+      <input type="text" id="out-title-input" placeholder="Article title here..." oninput="state.title=this.value;markDirty();liveScore()">
 
       <!-- Slug -->
       <div class="edit-field-title" style="margin-top:10px">URL Slug <span class="edit-hint">Auto-cleaned to lowercase-hyphenated</span></div>
-      <input type="text" id="out-slug-input" placeholder="article-slug-here" oninput="syncSlug(this.value);markDirty()">
+      <input type="text" id="out-slug-input" placeholder="article-slug-here" oninput="syncSlug(this.value);markDirty();liveScore()">
 
       <!-- Meta -->
       <div class="edit-field-title" style="margin-top:10px">Meta Description <span class="edit-hint">150-155 chars for best SEO</span></div>
-      <textarea id="out-meta-input" rows="2" placeholder="Meta description..." oninput="state.meta=this.value;updateCharCount();markDirty()"></textarea>
+      <textarea id="out-meta-input" rows="2" placeholder="Meta description..." oninput="state.meta=this.value;updateCharCount();markDirty();liveScore()"></textarea>
       <div class="char-count"><span id="meta-chars">0</span>/155 chars</div>
 
       <!-- Body -->
       <div class="edit-field-title" style="margin-top:10px">Article Body <span class="edit-hint">Markdown — edits update HTML preview live</span></div>
-      <textarea id="out-body-input" rows="22" placeholder="Article body will appear here after generation..." oninput="state.content=this.value;livePreview();markDirty()"></textarea>
+      <textarea id="out-body-input" rows="22" placeholder="Article body will appear here after generation..." oninput="state.content=this.value;livePreview();markDirty();liveScore()"></textarea>
 
       <!-- Inline SERP -->
       <div class="serp-panel" id="serp-inline">
@@ -781,6 +782,7 @@ function switchStage(n) {
     if (i + 1 === n) s.classList.add('active');
   });
   if (n === 4) runOptimize();
+  if (n === 5 && state.content) { var d = computeScores(); state.scores = d; renderLiveStrip(d); }
   if (n === 6) updatePublishPreview();
 }
 
@@ -1647,139 +1649,294 @@ function qaSubRow(label, pass, detail) { return { label:label, pass:!!pass, deta
 // ═══════════════════════════════════════════════════════
 // STAGE 4 — OPTIMIZE (SEO / GEO / AI scoring + 85 gate)
 // ═══════════════════════════════════════════════════════
-async function runOptimize() {
-  if (!state.content) { return; }
 
-  var loading = document.getElementById('opt-loading');
-  if (loading) loading.style.display = 'block';
+// ═══════════════════════════════════════════════════════
+// v6.1.0 — BROWSER-SIDE LIVE SCORING ENGINE
+// Mirrors the server /score logic, runs instantly on keystroke
+// ═══════════════════════════════════════════════════════
+function computeScores() {
+  var title   = (state.title || '').trim();
+  var meta    = (state.meta || '').trim();
+  var slug    = (state.slug || '').trim();
+  var content = (state.content || '');
+  var html    = (state.html || '');
+  var faq     = state.faq || [];
+  var keyword = (state.topic || '').toLowerCase();
+  var lc      = content.toLowerCase();
+  var wordCount = content ? content.split(/\s+/).filter(Boolean).length : 0;
+  var h2Count = (content.match(/^##\s/gm) || []).length;
 
-  try {
-    var r = await fetch(PROXY + '/score', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title:   state.title,
-        meta:    state.meta,
-        slug:    state.slug,
-        content: state.content,
-        html:    state.html,
-        faq:     state.faq,
-        keyword: state.topic,
-        quickAnswer:   state.qa && state.qa ? (state.quickAnswer || '') : (state.quickAnswer || ''),
-        takeaways:     state.takeaways || [],
-        internalLinks: state.internalLinks || []
-      })
-    });
-    var d = await r.json();
-    if (d.error) throw new Error(d.error);
-
-    state.scores = d;
-    renderScores(d);
-
-  } catch(e) {
-    notify('Scoring failed: ' + e.message, 'error');
-  } finally {
-    if (loading) loading.style.display = 'none';
+  function chk(label, pass, fix, kind) {
+    return { label: label, pass: !!pass, fix: pass ? '' : fix, kind: kind || 'content' };
   }
+
+  // ── SEO (9) ──
+  var seo = [
+    chk('Keyword in title', keyword && title.toLowerCase().indexOf(keyword.split(' ')[0]) > -1,
+      'Add the primary keyword near the start of the SEO title.', 'manual'),
+    chk('Title length 30-60 chars', title.length >= 30 && title.length <= 60,
+      'Adjust title to 30-60 characters.', 'manual'),
+    chk('Meta description 120-160 chars', meta.length >= 120 && meta.length <= 160,
+      'Rewrite meta to 150-155 characters.', 'manual'),
+    chk('Clean slug', /^[a-z0-9-]+$/.test(slug) && slug.length > 3,
+      'Slug must be lowercase-hyphenated.', 'manual'),
+    chk('At least 3 H2 sections', h2Count >= 3,
+      'Add more H2 sections (4-6 keyword-rich headings).', 'content'),
+    chk('Word count 1200+', wordCount >= 1200,
+      'Expand article to at least 1,200 words.', 'content'),
+    chk('Has data table', html.indexOf('<table') > -1 || content.indexOf('|') > -1,
+      'Add a comparison or data table for snippets.', 'structural'),
+    chk('Internal links present', (state.internalLinks || []).length > 0 || content.indexOf('[INTERNAL') > -1,
+      'Add 2-4 internal links to related BSM articles.', 'structural'),
+    chk('Schema markup present', html.indexOf('application/ld+json') > -1,
+      'Schema is auto-added on Update — press Update Article.', 'structural')
+  ];
+
+  // ── GEO (6) ──
+  var geo = [
+    chk('Quick answer box', !!state.quickAnswer || html.indexOf('bsm-quick-answer') > -1 || html.indexOf('bsm-verdict') > -1,
+      'Add a Quick Answer box (1-2 sentence direct answer).', 'structural'),
+    chk('Direct-answer opening', content.slice(0, 300).split('.').length >= 2,
+      'Open with a direct factual sentence.', 'content'),
+    chk('Specific numbers/stats', (content.match(/\d/g) || []).length >= 15,
+      'Add more numbers, dates, and statistics.', 'content'),
+    chk('Named entities', (content.match(/[A-Z][a-z]+\s[A-Z][a-z]+/g) || []).length >= 8,
+      'Reference more named people, teams, places.', 'content'),
+    chk('FAQ present (4+)', faq.length >= 4,
+      'Add at least 4 FAQ items.', 'content'),
+    chk('Definitional clarity', /\bis\b|\bare\b|\bmeans\b|\brefers\b/.test(lc.slice(0, 600)),
+      'Include a clear "X is Y" statement near the top.', 'content')
+  ];
+
+  // ── AI/LLM (6) ──
+  var ai = [
+    chk('Extractable claims', (content.match(/\d+\s*(goals|wins|points|percent|%|million|billion|years|matches|teams)/gi) || []).length >= 3,
+      'Add self-contained factual claims with numbers.', 'content'),
+    chk('Source attribution', /according to|reported|confirmed|announced|per /i.test(content),
+      'Attribute key facts (according to, reported by).', 'content'),
+    chk('FAQ schema-ready', faq.length >= 4,
+      'Ensure 4-7 FAQ items in Q/A format.', 'content'),
+    chk('Key takeaways block', (state.takeaways || []).length > 0 || html.indexOf('bsm-takeaways') > -1,
+      'Add a Key Takeaways list.', 'structural'),
+    chk('Scannable structure', h2Count >= 3 && faq.length >= 4,
+      'Improve structure: clear H2s + FAQ.', 'content'),
+    chk('Entity-rich content', (content.match(/[A-Z][a-z]+\s[A-Z][a-z]+/g) || []).length >= 8,
+      'Name more specific entities.', 'content')
+  ];
+
+  function scoreOf(arr) {
+    return Math.round((arr.filter(function(c){ return c.pass; }).length / arr.length) * 100);
+  }
+
+  return {
+    seo: { score: scoreOf(seo), checks: seo },
+    geo: { score: scoreOf(geo), checks: geo },
+    ai:  { score: scoreOf(ai),  checks: ai },
+    wordCount: wordCount, h2Count: h2Count, faqCount: faq.length
+  };
+}
+
+// Runs scoring locally (no API), updates state + UI
+function runOptimize() {
+  if (!state.content) { return; }
+  var d = computeScores();
+  state.scores = d;
+  renderScores(d);
+  renderLiveStrip(d);
+}
+
+// Live recompute — called on every edit keystroke (debounced)
+var _liveTimer = null;
+function liveScore() {
+  clearTimeout(_liveTimer);
+  _liveTimer = setTimeout(function() {
+    var d = computeScores();
+    state.scores = d;
+    renderLiveStrip(d);
+    // If the optimize panel is visible, update it too
+    if (document.getElementById('panel-4') && document.getElementById('panel-4').classList.contains('active')) {
+      renderScores(d);
+    }
+  }, 400);
 }
 
 function renderScores(d) {
   var pass = PUBLISH_THRESHOLD;
-
-  // Update gauges
   setGauge('seo', d.seo.score, pass);
   setGauge('geo', d.geo.score, pass);
   setGauge('ai',  d.ai.score,  pass);
 
   var allPass = d.seo.score >= pass && d.geo.score >= pass && d.ai.score >= pass;
 
-  // Verdict line
   var verdict = document.getElementById('opt-verdict');
-  verdict.style.display = 'block';
-  if (allPass) {
-    verdict.style.background = '#001a00';
-    verdict.style.border = '1px solid #004400';
-    verdict.style.color = 'var(--green)';
-    verdict.textContent = 'All three scores clear ' + pass + '. Publishing unlocked.';
-  } else {
-    verdict.style.background = '#1a0000';
-    verdict.style.border = '1px solid #440000';
-    verdict.style.color = 'var(--red)';
-    var failed = [];
-    if (d.seo.score < pass) failed.push('SEO ' + d.seo.score);
-    if (d.geo.score < pass) failed.push('GEO ' + d.geo.score);
-    if (d.ai.score < pass)  failed.push('AI ' + d.ai.score);
-    verdict.textContent = 'Below ' + pass + ' threshold: ' + failed.join(', ') + '. Fix the items below, then re-run scoring.';
+  if (verdict) {
+    verdict.style.display = 'block';
+    if (allPass) {
+      verdict.style.background = '#001a00'; verdict.style.border = '1px solid #004400'; verdict.style.color = 'var(--green)';
+      verdict.textContent = 'All three scores clear ' + pass + '. Publishing unlocked.';
+    } else {
+      verdict.style.background = '#1a0000'; verdict.style.border = '1px solid #440000'; verdict.style.color = 'var(--red)';
+      var failed = [];
+      if (d.seo.score < pass) failed.push('SEO ' + d.seo.score);
+      if (d.geo.score < pass) failed.push('GEO ' + d.geo.score);
+      if (d.ai.score < pass)  failed.push('AI ' + d.ai.score);
+      verdict.textContent = 'Below ' + pass + ' threshold: ' + failed.join(', ') + '. Fix items below.';
+    }
   }
 
-  // Failed checks with fixes
   var fixesEl = document.getElementById('opt-fixes');
-  var groups = [
-    { name:'SEO',     color:'var(--lime)',   data:d.seo },
-    { name:'GEO',     color:'var(--blue)',   data:d.geo },
-    { name:'AI / LLM',color:'var(--orange)', data:d.ai }
-  ];
-  var html = '';
-  groups.forEach(function(g) {
-    var failed = g.data.checks.filter(function(c){ return !c.pass; });
-    if (failed.length === 0) return;
-    html += '<div class="opt-fix-group">'
-      + '<div class="opt-fix-group-title" style="color:' + g.color + '">' + g.name + ' &mdash; ' + failed.length + ' to fix</div>';
-    failed.forEach(function(c) {
-      html += '<div class="opt-fix-item">'
-        + '<span class="opt-fix-x">X</span>'
-        + '<div class="opt-fix-text"><div class="opt-fix-label">' + escHtml(c.label) + '</div>'
-        + '<div class="opt-fix-suggest">' + escHtml(c.fix) + '</div></div>'
-        + '<button class="opt-fix-btn" onclick="applyFix(\'' + escJs(c.fix) + '\')">Fix</button>'
-        + '</div>';
+  if (fixesEl) {
+    var groups = [
+      { name:'SEO', color:'var(--lime)', data:d.seo },
+      { name:'GEO', color:'var(--blue)', data:d.geo },
+      { name:'AI / LLM', color:'var(--orange)', data:d.ai }
+    ];
+    var html = '';
+    groups.forEach(function(g) {
+      var failed = g.data.checks.filter(function(c){ return !c.pass; });
+      if (failed.length === 0) return;
+      html += '<div class="opt-fix-group"><div class="opt-fix-group-title" style="color:' + g.color + '">' + g.name + ' &mdash; ' + failed.length + ' to fix</div>';
+      failed.forEach(function(c) {
+        var btnLabel = c.kind === 'structural' ? 'Fix' : (c.kind === 'manual' ? 'Edit' : 'AI Fix');
+        var btnColor = c.kind === 'structural' ? 'var(--green)' : (c.kind === 'manual' ? 'var(--mg)' : 'var(--blue)');
+        html += '<div class="opt-fix-item">'
+          + '<span class="opt-fix-x">X</span>'
+          + '<div class="opt-fix-text"><div class="opt-fix-label">' + escHtml(c.label) + '</div>'
+          + '<div class="opt-fix-suggest">' + escHtml(c.fix) + '</div></div>'
+          + '<button class="opt-fix-btn" style="background:' + btnColor + '" onclick="applyFix(\'' + escJs(c.label) + '\',\'' + c.kind + '\')">' + btnLabel + '</button>'
+          + '</div>';
+      });
+      html += '</div>';
     });
-    html += '</div>';
-  });
-  if (!html) {
-    html = '<div style="font-family:var(--f-m);font-size:11px;color:var(--green);padding:10px 0">All checks passed. Nothing to fix.</div>';
+    if (!html) html = '<div style="font-family:var(--f-m);font-size:11px;color:var(--green);padding:10px 0">All checks passed. Nothing to fix.</div>';
+    fixesEl.innerHTML = html;
   }
-  fixesEl.innerHTML = html;
 
-  // Gate the continue button + mark stage done
   var contBtn = document.getElementById('btn-opt-continue');
-  if (contBtn) {
-    contBtn.disabled = !allPass;
-    contBtn.style.opacity = allPass ? '1' : '.4';
-  }
+  if (contBtn) { contBtn.disabled = !allPass; contBtn.style.opacity = allPass ? '1' : '.4'; }
   if (allPass) markStageDone(4);
-
-  // Gate downstream publish buttons
   gatePublish(allPass);
+}
+
+// Compact live strip shown on the Edit tab
+function renderLiveStrip(d) {
+  var strip = document.getElementById('live-score-strip');
+  if (!strip) return;
+  var pass = PUBLISH_THRESHOLD;
+  function pill(label, score) {
+    var col = score >= pass ? 'var(--green)' : (score >= pass - 15 ? 'var(--orange)' : 'var(--red)');
+    return '<div style="display:flex;align-items:center;gap:6px">'
+      + '<span style="font-family:var(--f-m);font-size:9px;color:var(--mg);text-transform:uppercase;letter-spacing:.1em">' + label + '</span>'
+      + '<span style="font-family:var(--f-d);font-size:20px;font-weight:900;color:' + col + ';line-height:1">' + score + '</span>'
+      + '</div>';
+  }
+  var allPass = d.seo.score >= pass && d.geo.score >= pass && d.ai.score >= pass;
+  strip.innerHTML = pill('SEO', d.seo.score) + pill('GEO', d.geo.score) + pill('AI', d.ai.score)
+    + '<div style="margin-left:auto;font-family:var(--f-m);font-size:10px;color:' + (allPass ? 'var(--green)' : 'var(--orange)') + '">'
+    + (allPass ? 'Publish unlocked' : 'Gate: all 3 need ' + pass) + '</div>';
 }
 
 function setGauge(id, score, pass) {
   var el = document.getElementById(id + '-score');
   var box = document.getElementById('gauge-' + id);
   if (el) el.textContent = score;
-  if (box) {
-    box.classList.remove('pass', 'fail');
-    box.classList.add(score >= pass ? 'pass' : 'fail');
+  if (box) { box.classList.remove('pass', 'fail'); box.classList.add(score >= pass ? 'pass' : 'fail'); }
+}
+
+// ── SMART FIX — structural=instant, content=targeted AI, manual=jump to field ──
+async function applyFix(label, kind) {
+  // STRUCTURAL — fix instantly in browser, no API, no regeneration
+  if (kind === 'structural') {
+    applyStructuralFix(label);
+    return;
+  }
+  // MANUAL — jump to the relevant edit field
+  if (kind === 'manual') {
+    switchStage(5);
+    notify('Edit the field directly: ' + label, 'success');
+    var map = { 'Keyword in title':'out-title-input', 'Title length 30-60 chars':'out-title-input',
+      'Meta description 120-160 chars':'out-meta-input', 'Clean slug':'out-slug-input' };
+    var fid = map[label];
+    if (fid) { var fe = document.getElementById(fid); if (fe) { fe.focus(); fe.scrollIntoView({behavior:'smooth',block:'center'}); } }
+    return;
+  }
+  // CONTENT — targeted single-section rewrite via /fix-section (NOT full regenerate)
+  notify('AI is fixing only: ' + label + '...', 'success');
+  try {
+    var r = await fetch(PROXY + '/fix-section', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ content: state.content, weakness: label, topic: state.topic })
+    });
+    var d = await r.json();
+    if (d.error) throw new Error(d.error);
+    state.content = d.content;
+    // Re-extract FAQ from the fixed content
+    reparseFaqFromContent();
+    rebuildStyledHtml();
+    populateEditPanel();
+    runOptimize();
+    notify('Fixed: ' + label, 'success');
+  } catch(e) {
+    notify('Fix failed: ' + e.message, 'error');
   }
 }
 
-// One-click fix: re-prompt Claude to repair the specific weakness
-async function applyFix(fixText) {
-  notify('Applying fix — regenerating with: ' + fixText.slice(0, 40) + '...', 'success');
-  // Append the fix instruction to the topic context and regenerate
-  state._fixInstruction = fixText;
-  await generateArticle();
+// Instant structural fixes — no API call
+function applyStructuralFix(label) {
+  if (label === 'Internal links present') {
+    if (!state.internalLinks || !state.internalLinks.length) {
+      state.internalLinks = ['World Cup 2026 Complete Guide', 'World Cup 2026 Schedule and Fixtures'];
+    }
+    // Append INTERNAL markers to content if not present
+    if (state.content.indexOf('[INTERNAL') === -1) {
+      state.content += '\n\n[INTERNAL: World Cup 2026 Complete Guide]\n[INTERNAL: World Cup 2026 Schedule and Fixtures]';
+    }
+    notify('Internal links added', 'success');
+  } else if (label === 'Has data table') {
+    // Insert a simple markdown comparison table the editor can fill
+    var table = '\n\n## Quick Comparison\n\n| Item | Detail | Value |\n| --- | --- | --- |\n| Option 1 | Description | Data |\n| Option 2 | Description | Data |\n| Option 3 | Description | Data |\n\n';
+    state.content += table;
+    notify('Comparison table added — edit the cells in the body', 'success');
+  } else if (label === 'Quick answer box') {
+    if (!state.quickAnswer) {
+      var firstSentence = (state.content.split('.')[0] || state.topic).trim() + '.';
+      state.quickAnswer = firstSentence.slice(0, 200);
+    }
+    notify('Quick answer box added', 'success');
+  } else if (label === 'Key takeaways block') {
+    if (!state.takeaways || !state.takeaways.length) {
+      var paras = state.content.split('\n\n').filter(function(p){ return p.length > 40 && !p.startsWith('#'); });
+      state.takeaways = paras.slice(0, 3).map(function(p){ return p.split('.')[0].replace(/\*\*/g,'').trim() + '.'; });
+    }
+    notify('Key takeaways added', 'success');
+  } else if (label === 'Schema markup present') {
+    notify('Schema is added automatically — press Update Article', 'success');
+  }
+  rebuildStyledHtml();
+  populateEditPanel();
+  runOptimize();
 }
 
-// Enable/disable all publish buttons based on the gate
+// Re-extract FAQ from edited markdown body
+function reparseFaqFromContent() {
+  var content = state.content || '';
+  var faqs = [];
+  var chunks = content.split(/\*\*Q:\*\*/i).filter(function(s){ return s.trim(); });
+  chunks.forEach(function(chunk) {
+    var aIdx = chunk.search(/\*\*A:\*\*/i);
+    if (aIdx === -1) return;
+    var q = chunk.slice(0, aIdx).replace(/\*\*/g,'').replace(/^[?:\s]+/,'').trim();
+    var a = chunk.slice(aIdx).replace(/^\*\*A:\*\*/i,'').replace(/\*\*Q:[\s\S]*/i,'').replace(/\*\*/g,'').trim().replace(/\n/g,' ').replace(/\s+/g,' ');
+    if (q && a && q.length > 3 && a.length > 10) faqs.push({q:q, a:a});
+  });
+  if (faqs.length >= 1) state.faq = faqs;
+}
+
 function gatePublish(allowed) {
-  var ids = ['btn-go-publish', 'btn-publish'];
-  ids.forEach(function(id) {
+  ['btn-go-publish', 'btn-publish'].forEach(function(id) {
     var b = document.getElementById(id);
-    if (b) {
-      b.disabled = !allowed;
-      b.style.opacity = allowed ? '1' : '.4';
-      b.title = allowed ? '' : 'Blocked: all 3 scores must reach ' + PUBLISH_THRESHOLD;
-    }
+    if (b) { b.disabled = !allowed; b.style.opacity = allowed ? '1' : '.4';
+      b.title = allowed ? '' : 'Blocked: all 3 scores must reach ' + PUBLISH_THRESHOLD; }
   });
 }
 
@@ -1788,4 +1945,5 @@ function gatePublish(allowed) {
 updateReadtime();
 </script>
 </body>
+
 </html>
