@@ -451,6 +451,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
       <div style="display:flex;gap:6px">
         <button class="btn btn-ghost btn-sm" onclick="generateArticle()">Regenerate</button>
         <button class="btn btn-ghost btn-sm" onclick="showSerpInline()">SERP Analysis</button>
+        <button class="btn btn-ghost btn-sm" onclick="runQaCheck()" style="border-color:rgba(0,180,255,.4);color:var(--blue)">QA Check</button>
         <button class="btn btn-lime btn-sm" onclick="switchStage(5)">Looks Good &rarr; Publish</button>
       </div>
     </div>
@@ -483,6 +484,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
       </div>
 
       <!-- HTML preview -->
+      <!-- QA RESULTS PANEL -->
+      <div id="qa-panel" style="display:none;margin-top:12px;background:var(--black);border:1px solid var(--blue);border-radius:0;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#001a33;border-bottom:1px solid var(--blue)">
+          <span style="font-family:var(--f-m);font-size:9px;color:var(--blue);text-transform:uppercase;letter-spacing:.14em">QA / QC Report</span>
+          <button onclick="document.getElementById('qa-panel').style.display='none'" class="btn btn-ghost btn-sm">Close</button>
+        </div>
+        <div id="qa-body" style="padding:14px"></div>
+      </div>
+
       <div class="edit-field-title" style="margin-top:12px">HTML Preview <span class="edit-hint">What gets published to WordPress</span></div>
       <div class="html-preview" id="out-html-preview"></div>
 
@@ -625,7 +635,8 @@ var state = {
   artType: 'news',
   genCount: 0,
   pubCount: 0,
-  cost:     0
+  cost:     0,
+  qa:       null
 };
 var serpCache = null;
 var currentStage = 1;
@@ -1034,6 +1045,7 @@ async function generateArticle() {
     stxt.textContent = 'Done!';
 
     var bsm = d.bsm || {};
+    state.qa = d.qa || null;
     state.title   = cleanField(bsm.title || '');
     state.slug    = cleanSlug(bsm.slug || '');
     state.meta    = cleanField(bsm.meta || '');
@@ -1414,6 +1426,129 @@ function notify(msg, type) {
   clearTimeout(n._t);
   n._t = setTimeout(function() { n.className = 'notif'; }, 3500);
 }
+
+
+// ═══════════════════════════════════════════════════════
+// QA / QC CHECK — validates the generated article
+// Tests: source ingestion, fact traceability, PAA coverage,
+//        forbidden phrases, structure, word count
+// ═══════════════════════════════════════════════════════
+function runQaCheck() {
+  var panel = document.getElementById('qa-panel');
+  var body  = document.getElementById('qa-body');
+  panel.style.display = 'block';
+
+  var qa = state.qa || {};
+  var content = state.content || '';
+  var wordCount = content ? content.split(/\s+/).filter(Boolean).length : 0;
+  var targetWords = parseInt(document.getElementById('word-count').value) || 1600;
+
+  var rows = [];
+
+  // ── TEST 1: Source ingestion (did the server receive the sources?) ──
+  var serpOk = (qa.serpResultsUsed || 0) > 0;
+  var paaOk  = (qa.paaUsed || 0) > 0;
+  var refGiven = (qa.refUrls || []).length > 0;
+  var refOk  = (qa.refSourcesUsed || 0) > 0;
+
+  rows.push(qaRow('SERP results ingested', serpOk,
+    serpOk ? (qa.serpResultsUsed + ' results from ' + qa.serpSource) : 'No SERP data reached the server'));
+  rows.push(qaRow('PAA questions ingested', paaOk,
+    paaOk ? (qa.paaUsed + ' questions used') : 'No PAA questions ingested'));
+
+  if (refGiven) {
+    rows.push(qaRow('Reference URLs fetched', refOk,
+      refOk ? (qa.refSourcesUsed + ' of ' + qa.refUrls.length + ' URLs read successfully')
+            : 'URLs given but NONE fetched — check the URLs'));
+    // Per-URL detail
+    (qa.refUrls || []).forEach(function(r) {
+      rows.push(qaSubRow(r.url, r.ok, r.ok ? (r.chars + ' chars read') : 'fetch failed / empty'));
+    });
+  } else {
+    rows.push(qaRow('Reference URLs', true, 'None provided (optional) — SERP + PAA used'));
+  }
+
+  // ── TEST 2: Fact traceability (PAA coverage in article) ──
+  var paaQs = qa.paaQuestions || [];
+  var coveredCount = 0;
+  paaQs.forEach(function(q) {
+    // Extract key noun words from the PAA question and check presence in body
+    var keywords = (q || '').toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/)
+      .filter(function(w){ return w.length > 4; });
+    var hits = keywords.filter(function(w){ return content.toLowerCase().indexOf(w) > -1; });
+    if (keywords.length > 0 && hits.length / keywords.length >= 0.5) coveredCount++;
+  });
+  var paaCoverage = paaQs.length > 0 ? Math.round((coveredCount / paaQs.length) * 100) : 0;
+  if (paaQs.length > 0) {
+    rows.push(qaRow('PAA topics covered in article', paaCoverage >= 60,
+      coveredCount + ' of ' + paaQs.length + ' PAA topics appear in the body (' + paaCoverage + '%)'));
+  }
+
+  // ── TEST 3: Forbidden phrases scan ──
+  var forbidden = [
+    'in the world of sports', 'it goes without saying', 'at the end of the day',
+    'this is a testament to', 'in conclusion', 'it is worth noting that',
+    'sports have always been', 'throughout history'
+  ];
+  var found = forbidden.filter(function(p){ return content.toLowerCase().indexOf(p) > -1; });
+  rows.push(qaRow('No forbidden generic phrases', found.length === 0,
+    found.length === 0 ? 'Clean — no banned phrases' : 'Found: ' + found.join(', ')));
+
+  // ── TEST 4: Structure ──
+  var h2Count = (content.match(/^##\s/gm) || []).length;
+  rows.push(qaRow('H2 sections (min 3)', h2Count >= 3, h2Count + ' H2 headings'));
+
+  var faqCount = (state.faq || []).length;
+  rows.push(qaRow('FAQ items (4-7)', faqCount >= 4 && faqCount <= 7, faqCount + ' FAQ items'));
+
+  // ── TEST 5: Word count ──
+  var wcOk = wordCount >= targetWords * 0.85;
+  rows.push(qaRow('Word count near target', wcOk,
+    wordCount + ' words (target ' + targetWords + ')'));
+
+  // ── TEST 6: Title / meta / slug present and clean ──
+  rows.push(qaRow('SEO title set', !!state.title && state.title.length > 10,
+    state.title ? (state.title.length + ' chars') : 'missing'));
+  rows.push(qaRow('Meta description length', state.meta.length >= 120 && state.meta.length <= 160,
+    state.meta.length + ' chars (ideal 150-155)'));
+  rows.push(qaRow('Slug clean', /^[a-z0-9-]+$/.test(state.slug), state.slug || 'missing'));
+
+  // ── Score ──
+  var passCount = rows.filter(function(r){ return r.pass; }).length;
+  var totalCount = rows.filter(function(r){ return !r.sub; }).length;
+  var scorePct = Math.round((rows.filter(function(r){ return r.pass && !r.sub; }).length / totalCount) * 100);
+
+  var scoreColor = scorePct >= 80 ? 'var(--green)' : scorePct >= 60 ? 'var(--orange)' : 'var(--red)';
+
+  var html = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--dg)">'
+    + '<div style="font-family:var(--f-d);font-size:34px;font-weight:900;color:' + scoreColor + ';line-height:1">' + scorePct + '%</div>'
+    + '<div><div style="font-family:var(--f-d);font-size:16px;font-weight:700;color:var(--white);text-transform:uppercase">QA Score</div>'
+    + '<div style="font-family:var(--f-m);font-size:10px;color:var(--mg)">' + rows.filter(function(r){return r.pass&&!r.sub;}).length + ' of ' + totalCount + ' checks passed</div></div>'
+    + '</div>';
+
+  html += rows.map(function(r) {
+    if (r.sub) {
+      return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0 4px 20px;font-family:var(--f-m);font-size:9px;color:var(--mg)">'
+        + '<span style="color:' + (r.pass ? 'var(--green)' : 'var(--red)') + '">' + (r.pass ? 'ok' : 'x') + '</span>'
+        + '<span style="color:var(--blue);word-break:break-all">' + escHtml(r.label.slice(0,50)) + '</span>'
+        + '<span style="margin-left:auto;color:var(--mg)">' + escHtml(r.detail) + '</span></div>';
+    }
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03)">'
+      + '<span style="font-family:var(--f-m);font-size:11px;font-weight:700;color:' + (r.pass ? 'var(--green)' : 'var(--red)') + ';width:16px">' + (r.pass ? 'OK' : 'X') + '</span>'
+      + '<span style="font-family:var(--f-d);font-size:14px;font-weight:600;color:var(--white);flex:1">' + escHtml(r.label) + '</span>'
+      + '<span style="font-family:var(--f-m);font-size:10px;color:var(--mg);text-align:right;max-width:50%">' + escHtml(r.detail) + '</span>'
+      + '</div>';
+  }).join('');
+
+  if (!state.qa) {
+    html += '<div style="margin-top:10px;font-family:var(--f-m);font-size:10px;color:var(--orange)">Note: source ingestion data unavailable — regenerate the article to capture full QA telemetry.</div>';
+  }
+
+  body.innerHTML = html;
+}
+
+function qaRow(label, pass, detail) { return { label:label, pass:!!pass, detail:detail||'', sub:false }; }
+function qaSubRow(label, pass, detail) { return { label:label, pass:!!pass, detail:detail||'', sub:true }; }
 
 // Init readtime
 updateReadtime();
