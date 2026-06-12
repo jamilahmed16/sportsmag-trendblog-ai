@@ -230,7 +230,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
 <!-- TOP BAR -->
 <nav class="topbar">
   <div class="topbar-logo">Best<span>Sports</span>Mag</div>
-  <div class="topbar-tool">TrendBlog AI v6.1 &mdash; World Cup 2026</div>
+  <div class="topbar-tool">TrendBlog AI v6.2.1 &mdash; World Cup 2026</div>
   <div class="topbar-right">
     <div class="proxy-pill">
       <div class="proxy-dot checking" id="proxy-dot"></div>
@@ -475,7 +475,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
 
   <div class="card">
     <div class="card-head">
-      <div class="card-title">Optimization Score &mdash; Publish gate 85/100</div>
+      <div class="card-title">Optimization Score &mdash; Guidance</div>
       <button class="btn btn-ghost btn-sm" onclick="runOptimize()">Re-run Scoring</button>
     </div>
     <div class="card-body">
@@ -484,7 +484,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
       </div>
 
       <!-- 3 score gauges -->
-      <div id="opt-gauges" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      <div id="opt-gauges" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
         <div class="opt-gauge" id="gauge-seo">
           <div class="opt-gauge-score" id="seo-score">--</div>
           <div class="opt-gauge-label">SEO</div>
@@ -500,15 +500,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
           <div class="opt-gauge-label">AI / LLM</div>
           <div class="opt-gauge-sub">ChatGPT, Perplexity</div>
         </div>
+        <div class="opt-gauge" id="gauge-grounding">
+          <div class="opt-gauge-score" id="grounding-score">--</div>
+          <div class="opt-gauge-label">Grounding</div>
+          <div class="opt-gauge-sub">Gate 70 &middot; facts sourced</div>
+        </div>
       </div>
 
+      <div id="dfseo-panel" style="display:none;background:var(--black);border:1px solid var(--dg);padding:14px 16px;margin-bottom:14px"></div>
       <div id="opt-verdict" style="font-family:var(--f-m);font-size:11px;padding:10px 14px;margin-bottom:14px;display:none"></div>
 
       <!-- Failed checks with fixes -->
       <div id="opt-fixes"></div>
 
       <div class="btn-row">
-        <button class="btn btn-lime" id="btn-opt-continue" onclick="switchStage(5)" disabled style="opacity:.4">Continue to Edit &rarr;</button>
+        <button class="btn btn-lime" id="btn-opt-continue" onclick="switchStage(5)">Continue to Edit &rarr;</button>
         <button class="btn btn-ghost" onclick="switchStage(3)">Back to Generate</button>
       </div>
     </div>
@@ -575,7 +581,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
 
       <div class="btn-row" style="margin-top:14px">
         <button class="btn btn-lime" id="btn-update" onclick="updateArticle()" style="min-width:140px">Update Article</button>
-        <button class="btn btn-green" id="btn-go-publish" onclick="switchStage(6)" disabled style="opacity:.4;min-width:180px">Publish to WordPress &rarr;</button>
+        <button class="btn btn-green" id="btn-go-publish" onclick="switchStage(6)" style="min-width:180px">Publish to WordPress &rarr;</button>
         <button class="btn btn-ghost" onclick="copyHtml()">Copy HTML</button>
         <button class="btn btn-ghost" onclick="copyAll()">Copy All Fields</button>
         <button class="btn btn-ghost" onclick="generateArticle()">Regenerate</button>
@@ -717,9 +723,12 @@ var state = {
   scores:   null,
   quickAnswer:   '',
   takeaways:     [],
-  internalLinks: []
+  internalLinks: [],
+  refContent:    [],
+  dfseo:         null
 };
 var PUBLISH_THRESHOLD = 85;
+var GROUNDING_THRESHOLD = 70;
 var serpCache = null;
 var currentStage = 1;
 var stageDone = [false, false, false, false, false, false];
@@ -1036,6 +1045,7 @@ async function generateArticle() {
       });
       var refData = await refResp.json();
       refContent = refData.results || [];
+      state.refContent = refContent;
       var successCount = refData.successful || 0;
       if (refStatusEl) refStatusEl.textContent = successCount + ' of ' + refUrls.length + ' URLs fetched successfully';
       if (successCount > 0) notify(successCount + ' reference URL(s) loaded', 'success');
@@ -1160,6 +1170,7 @@ async function generateArticle() {
     markStageDone(3);
     populateEditPanel();
     switchStage(4);
+    fetchDataforSEO();
     notify('Article generated. Review and edit before publishing.', 'success');
 
   } catch(e) {
@@ -1420,10 +1431,7 @@ async function testWP() {
 
 async function publishWP() {
   // GATE: all 3 scores must clear threshold
-  if (!state.scores || state.scores.seo.score < PUBLISH_THRESHOLD || state.scores.geo.score < PUBLISH_THRESHOLD || state.scores.ai.score < PUBLISH_THRESHOLD) {
-    notify('Publish blocked — all 3 scores must reach ' + PUBLISH_THRESHOLD + '. Go to Optimize.', 'error');
-    return;
-  }
+  // Scores are guidance only — no publish gate.
   // If user edited but did not press Update, force rebuild now
   if (isDirty) { updateArticle(); }
   if (!state.title || !state.html) { notify('No article to publish — generate one first', 'error'); return; }
@@ -1654,6 +1662,60 @@ function qaSubRow(label, pass, detail) { return { label:label, pass:!!pass, deta
 // v6.1.0 — BROWSER-SIDE LIVE SCORING ENGINE
 // Mirrors the server /score logic, runs instantly on keystroke
 // ═══════════════════════════════════════════════════════
+
+// ── DataforSEO — automatic real keyword + competitor data ──
+async function fetchDataforSEO() {
+  if (!state.topic) return;
+  try {
+    var r = await fetch(PROXY + '/dfseo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyword: state.topic })
+    });
+    var d = await r.json();
+    state.dfseo = d;
+    renderDfseo(d);
+    // Re-run optimize so the SEO score can factor in real difficulty
+    if (document.getElementById('panel-4') && document.getElementById('panel-4').classList.contains('active')) {
+      runOptimize();
+    }
+  } catch(e) {
+    state.dfseo = { enabled: false, error: e.message };
+  }
+}
+
+function renderDfseo(d) {
+  var el = document.getElementById('dfseo-panel');
+  if (!el) return;
+  if (!d || d.enabled === false) {
+    el.style.display = 'block';
+    el.innerHTML = '<div style="font-family:var(--f-m);font-size:10px;color:var(--mg)">DataforSEO not configured. Add DATAFORSEO_LOGIN and DATAFORSEO_PASSWORD to Render env vars to enable real keyword difficulty and competitor data.</div>';
+    return;
+  }
+  if (d.error) {
+    el.style.display = 'block';
+    el.innerHTML = '<div style="font-family:var(--f-m);font-size:10px;color:var(--red)">DataforSEO error: ' + escHtml(d.error) + '</div>';
+    return;
+  }
+  el.style.display = 'block';
+  var diffColor = d.difficulty == null ? 'var(--mg)' : (d.difficulty < 30 ? 'var(--green)' : d.difficulty < 60 ? 'var(--orange)' : 'var(--red)');
+  var html = '<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;margin-bottom:10px">'
+    + '<div><div style="font-family:var(--f-m);font-size:9px;color:var(--mg);text-transform:uppercase;letter-spacing:.1em">Keyword Difficulty</div>'
+    + '<div style="font-family:var(--f-d);font-size:28px;font-weight:900;color:' + diffColor + ';line-height:1">' + (d.difficulty != null ? d.difficulty : '--') + '</div></div>'
+    + '<div><div style="font-family:var(--f-m);font-size:9px;color:var(--mg);text-transform:uppercase;letter-spacing:.1em">Search Volume</div>'
+    + '<div style="font-family:var(--f-d);font-size:28px;font-weight:900;color:var(--blue);line-height:1">' + (d.volume != null ? d.volume.toLocaleString() : '--') + '</div></div>'
+    + '<div><div style="font-family:var(--f-m);font-size:9px;color:var(--mg);text-transform:uppercase;letter-spacing:.1em">Competitors Found</div>'
+    + '<div style="font-family:var(--f-d);font-size:28px;font-weight:900;color:var(--white);line-height:1">' + (d.competitorCount || 0) + '</div></div>'
+    + '</div>';
+  if (d.competitors && d.competitors.length) {
+    html += '<div style="font-family:var(--f-m);font-size:9px;color:var(--lime);text-transform:uppercase;letter-spacing:.12em;margin:8px 0 6px">Who Ranks Now</div>';
+    html += d.competitors.slice(0,5).map(function(c) {
+      return '<div style="font-family:var(--f-m);font-size:10px;color:var(--lg);padding:3px 0">' + c.position + '. <span style="color:var(--blue)">' + escHtml(c.domain) + '</span> &mdash; ' + escHtml((c.title||'').slice(0,70)) + '</div>';
+    }).join('');
+  }
+  el.innerHTML = html;
+}
+
 function computeScores() {
   var title   = (state.title || '').trim();
   var meta    = (state.meta || '').trim();
@@ -1724,6 +1786,10 @@ function computeScores() {
       'Name more specific entities.', 'content')
   ];
 
+  // ── FACT-GROUNDING (hallucination circuit-breaker) ──
+  // What % of the article's factual claims trace to reference URLs or SERP context?
+  var grounding = computeGrounding(content, faq);
+
   function scoreOf(arr) {
     return Math.round((arr.filter(function(c){ return c.pass; }).length / arr.length) * 100);
   }
@@ -1732,7 +1798,73 @@ function computeScores() {
     seo: { score: scoreOf(seo), checks: seo },
     geo: { score: scoreOf(geo), checks: geo },
     ai:  { score: scoreOf(ai),  checks: ai },
+    grounding: grounding,
     wordCount: wordCount, h2Count: h2Count, faqCount: faq.length
+  };
+}
+
+// ── Fact-grounding engine ──
+// Extracts factual claims (sentences with numbers, names, dates, attribution)
+// then checks what fraction appear in the reference + SERP source text.
+function computeGrounding(content, faq) {
+  // Build the combined source corpus from reference URLs + SERP
+  var corpus = '';
+  (state.refContent || []).forEach(function(r) { if (r.text) corpus += ' ' + r.text; });
+  if (state.qa && state.qa.serpSource) {
+    // SERP descriptions if available via serpCache
+  }
+  if (window.serpCache) {
+    (serpCache.results || []).forEach(function(r) { corpus += ' ' + (r.title||'') + ' ' + (r.description||''); });
+    (serpCache.paa || []).forEach(function(p) { corpus += ' ' + (p.q||'') + ' ' + (p.a||''); });
+  }
+  corpus = corpus.toLowerCase();
+
+  var hasSources = corpus.trim().length > 100;
+
+  // Extract factual sentences — those containing a number, a proper-noun pair, or attribution
+  var sentences = content.replace(/\n/g,' ').split(/(?<=[.!?])\s+/).filter(function(s){ return s.length > 25; });
+  var factual = sentences.filter(function(s) {
+    return /\d/.test(s) || /[A-Z][a-z]+\s[A-Z][a-z]+/.test(s);
+  });
+
+  if (!hasSources) {
+    // No sources provided — cannot verify. Grounding is unknown, treat as 0 with a clear flag.
+    return {
+      score: 0,
+      hasSources: false,
+      totalClaims: factual.length,
+      groundedClaims: 0,
+      unsourced: [],
+      note: 'No reference URLs or SERP data available to verify claims against. Add reference URLs to enable grounding.'
+    };
+  }
+
+  // For each factual sentence, check if its key tokens appear in the corpus
+  var grounded = 0;
+  var unsourced = [];
+  factual.forEach(function(s) {
+    // Extract distinctive tokens: capitalised words + numbers
+    var tokens = [];
+    var caps = s.match(/[A-Z][a-z]{3,}/g) || [];
+    var nums = s.match(/\b\d{2,}\b/g) || [];
+    tokens = caps.concat(nums).map(function(t){ return t.toLowerCase(); });
+    tokens = tokens.filter(function(t, i){ return tokens.indexOf(t) === i; }); // unique
+    if (tokens.length === 0) { grounded++; return; } // no checkable tokens, neutral
+    var hits = tokens.filter(function(t){ return corpus.indexOf(t) > -1; });
+    var ratio = hits.length / tokens.length;
+    if (ratio >= 0.4) grounded++;
+    else if (unsourced.length < 8) unsourced.push(s.trim().slice(0, 120));
+  });
+
+  var score = factual.length > 0 ? Math.round((grounded / factual.length) * 100) : 100;
+
+  return {
+    score: score,
+    hasSources: true,
+    totalClaims: factual.length,
+    groundedClaims: grounded,
+    unsourced: unsourced,
+    note: ''
   };
 }
 
@@ -1762,25 +1894,29 @@ function liveScore() {
 
 function renderScores(d) {
   var pass = PUBLISH_THRESHOLD;
+  var gpass = GROUNDING_THRESHOLD;
   setGauge('seo', d.seo.score, pass);
   setGauge('geo', d.geo.score, pass);
   setGauge('ai',  d.ai.score,  pass);
+  if (d.grounding) setGauge('grounding', d.grounding.score, gpass);
 
-  var allPass = d.seo.score >= pass && d.geo.score >= pass && d.ai.score >= pass;
+  var allPass = d.seo.score >= pass && d.geo.score >= pass && d.ai.score >= pass
+    && d.grounding && d.grounding.score >= gpass;
 
   var verdict = document.getElementById('opt-verdict');
   if (verdict) {
     verdict.style.display = 'block';
     if (allPass) {
       verdict.style.background = '#001a00'; verdict.style.border = '1px solid #004400'; verdict.style.color = 'var(--green)';
-      verdict.textContent = 'All three scores clear ' + pass + '. Publishing unlocked.';
+      verdict.textContent = 'All targets met. You can publish.';
     } else {
       verdict.style.background = '#1a0000'; verdict.style.border = '1px solid #440000'; verdict.style.color = 'var(--red)';
       var failed = [];
       if (d.seo.score < pass) failed.push('SEO ' + d.seo.score);
       if (d.geo.score < pass) failed.push('GEO ' + d.geo.score);
       if (d.ai.score < pass)  failed.push('AI ' + d.ai.score);
-      verdict.textContent = 'Below ' + pass + ' threshold: ' + failed.join(', ') + '. Fix items below.';
+      if (d.grounding && d.grounding.score < gpass) failed.push('Grounding ' + d.grounding.score + '/' + gpass);
+      verdict.textContent = 'Suggestions to improve: ' + failed.join(', ') + '. You can still publish anytime.';
     }
   }
 
@@ -1808,14 +1944,35 @@ function renderScores(d) {
       });
       html += '</div>';
     });
+    // Grounding section
+    if (d.grounding) {
+      var g = d.grounding;
+      if (!g.hasSources) {
+        html += '<div class="opt-fix-group"><div class="opt-fix-group-title" style="color:var(--red)">Grounding &mdash; no sources</div>'
+          + '<div class="opt-fix-item"><span class="opt-fix-x">!</span>'
+          + '<div class="opt-fix-text"><div class="opt-fix-label">No reference sources to verify facts</div>'
+          + '<div class="opt-fix-suggest">' + escHtml(g.note) + '</div></div>'
+          + '<button class="opt-fix-btn" style="background:var(--mg)" onclick="switchStage(3)">Add URLs</button></div></div>';
+      } else if (g.score < GROUNDING_THRESHOLD) {
+        html += '<div class="opt-fix-group"><div class="opt-fix-group-title" style="color:var(--red)">Grounding ' + g.score + '/' + GROUNDING_THRESHOLD + ' &mdash; ' + g.unsourced.length + ' unsourced claims</div>';
+        html += '<div style="font-family:var(--f-m);font-size:10px;color:var(--mg);padding:4px 0 8px">' + g.groundedClaims + ' of ' + g.totalClaims + ' factual claims trace to your sources. These do not:</div>';
+        g.unsourced.forEach(function(claim) {
+          html += '<div class="opt-fix-item"><span class="opt-fix-x">?</span>'
+            + '<div class="opt-fix-text"><div class="opt-fix-suggest" style="color:var(--orange)">' + escHtml(claim) + '...</div></div></div>';
+        });
+        html += '<div style="font-family:var(--f-m);font-size:10px;color:var(--mg);padding:8px 0">Add a reference URL covering these, or remove/rephrase the unverified claims.</div>';
+        html += '</div>';
+      }
+    }
+
     if (!html) html = '<div style="font-family:var(--f-m);font-size:11px;color:var(--green);padding:10px 0">All checks passed. Nothing to fix.</div>';
     fixesEl.innerHTML = html;
   }
 
   var contBtn = document.getElementById('btn-opt-continue');
-  if (contBtn) { contBtn.disabled = !allPass; contBtn.style.opacity = allPass ? '1' : '.4'; }
-  if (allPass) markStageDone(4);
-  gatePublish(allPass);
+  if (contBtn) { contBtn.disabled = false; contBtn.style.opacity = '1'; }
+  markStageDone(4);
+  gatePublish(true);
 }
 
 // Compact live strip shown on the Edit tab
@@ -1830,10 +1987,18 @@ function renderLiveStrip(d) {
       + '<span style="font-family:var(--f-d);font-size:20px;font-weight:900;color:' + col + ';line-height:1">' + score + '</span>'
       + '</div>';
   }
-  var allPass = d.seo.score >= pass && d.geo.score >= pass && d.ai.score >= pass;
+  function gpill(label, score, thresh) {
+    var col = score >= thresh ? 'var(--green)' : (score >= thresh - 15 ? 'var(--orange)' : 'var(--red)');
+    return '<div style="display:flex;align-items:center;gap:6px">'
+      + '<span style="font-family:var(--f-m);font-size:9px;color:var(--mg);text-transform:uppercase;letter-spacing:.1em">' + label + '</span>'
+      + '<span style="font-family:var(--f-d);font-size:20px;font-weight:900;color:' + col + ';line-height:1">' + score + '</span></div>';
+  }
+  var gScore = d.grounding ? d.grounding.score : 0;
+  var allPass = d.seo.score >= pass && d.geo.score >= pass && d.ai.score >= pass && gScore >= GROUNDING_THRESHOLD;
   strip.innerHTML = pill('SEO', d.seo.score) + pill('GEO', d.geo.score) + pill('AI', d.ai.score)
-    + '<div style="margin-left:auto;font-family:var(--f-m);font-size:10px;color:' + (allPass ? 'var(--green)' : 'var(--orange)') + '">'
-    + (allPass ? 'Publish unlocked' : 'Gate: all 3 need ' + pass) + '</div>';
+    + gpill('GND', gScore, GROUNDING_THRESHOLD)
+    + '<div style="margin-left:auto;font-family:var(--f-m);font-size:10px;color:' + (allPass ? 'var(--green)' : 'var(--mg)') + '">'
+    + (allPass ? 'All targets met' : 'Scores are guidance') + '</div>';
 }
 
 function setGauge(id, score, pass) {
@@ -1933,10 +2098,10 @@ function reparseFaqFromContent() {
 }
 
 function gatePublish(allowed) {
+  // Gate removed — scores are guidance only. Publish always enabled.
   ['btn-go-publish', 'btn-publish'].forEach(function(id) {
     var b = document.getElementById(id);
-    if (b) { b.disabled = !allowed; b.style.opacity = allowed ? '1' : '.4';
-      b.title = allowed ? '' : 'Blocked: all 3 scores must reach ' + PUBLISH_THRESHOLD; }
+    if (b) { b.disabled = false; b.style.opacity = '1'; b.title = ''; }
   });
 }
 
