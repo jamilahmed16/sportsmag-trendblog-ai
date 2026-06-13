@@ -230,7 +230,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--lime)}
 <!-- TOP BAR -->
 <nav class="topbar">
   <div class="topbar-logo">Best<span>Sports</span>Mag</div>
-  <div class="topbar-tool">TrendBlog AI v6.2.1 &mdash; World Cup 2026</div>
+  <div class="topbar-tool">TrendBlog AI v6.2.2 &mdash; World Cup 2026</div>
   <div class="topbar-right">
     <div class="proxy-pill">
       <div class="proxy-dot checking" id="proxy-dot"></div>
@@ -1242,6 +1242,14 @@ function livePreview() {
 function rebuildStyledHtml() {
   var content = state.content || '';
 
+  // ── STEP 1: Remove the ENTIRE FAQ section from the body FIRST ──
+  // The FAQ is rendered separately from state.faq. Strip every trace from the
+  // body so it cannot appear as plain paragraphs or be duplicated.
+  // Matches "## Frequently Asked Questions" or "## FAQ" through to end or next part.
+  content = content.replace(/##\s*(?:Frequently Asked Questions|FAQ|FAQs)[\s\S]*$/im, '');
+  // Also strip any stray **Q:** / **A:** pairs that may sit outside a heading
+  content = content.replace(/\*\*Q:\*\*[\s\S]*?(?=\n##\s|$)/gi, '');
+
   // Parse markdown into sections
   var sections = [];
   var parts = content.split(/^## /m);
@@ -1253,8 +1261,8 @@ function rebuildStyledHtml() {
       if (nl > -1) { heading = part.slice(0, nl).replace(/\*\*/g,'').trim(); text = part.slice(nl+1); }
       else { heading = part.replace(/\*\*/g,'').trim(); text = ''; }
     }
-    // Strip FAQ section — handled separately
-    text = text.replace(/^## Frequently Asked Questions[\s\S]*/im, '');
+    // Safety: skip any FAQ heading that survived
+    if (/frequently asked questions|^faqs?$/i.test(heading)) return;
     // Convert inline markdown
     text = text
       .replace(/\[AFFILIATE:[^\]]+\]/gi, '')
@@ -1263,7 +1271,7 @@ function rebuildStyledHtml() {
       .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#FFFFFF;font-weight:600;">$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>');
     var paragraphs = text.split(/\n\n+/).map(function(p){ return p.trim(); })
-      .filter(function(p){ return p && !p.startsWith('#') && p.length > 15; })
+      .filter(function(p){ return p && !p.startsWith('#') && !/^\*\*[QA]:/.test(p) && p.length > 15; })
       .map(function(p){ return p.replace(/\n/g,' '); });
     if (paragraphs.length > 0 || heading) sections.push({ heading: heading, paragraphs: paragraphs });
   });
@@ -1275,7 +1283,6 @@ function rebuildStyledHtml() {
       bodyHtml += s.paragraphs.map(function(p) {
         return '<p style="font-family:\'Lora\',serif;font-size:17px;line-height:1.85;color:#C8C8C8;margin-bottom:22px;">' + p + '</p>';
       }).join('\n');
-      bodyHtml += '\n<div style="background:#111;border:1px dashed #2E2E2E;text-align:center;font-family:monospace;font-size:9px;color:#333;letter-spacing:.12em;text-transform:uppercase;min-height:90px;display:flex;align-items:center;justify-content:center;margin:28px 0;max-width:720px;"><!-- ADSENSE:728x90 --></div>\n';
     } else {
       if (s.heading) {
         bodyHtml += '\n<h2 style="font-family:\'Barlow Condensed\',sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;color:#FFFFFF;line-height:1;margin:40px 0 16px;padding-left:14px;border-left:3px solid #E8FF00;">' + s.heading + '</h2>\n';
